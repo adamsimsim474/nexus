@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS COMMAND - النظام القيادي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#00ff41;
+  --green-dim:#00aa28;
+  --green-glow:rgba(0,255,65,0.4);
+  --red:#ff0033;
+  --red-dim:#aa0022;
+  --amber:#ffaa00;
+  --bg:#000000;
+  --bg2:#050505;
+  --bg3:#0a0a0a;
+  --border:#1a2a1a;
+  --panel:#070f07;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-vt:'VT323',monospace;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:var(--font-mono);color:var(--green);position:relative}
+
+/* CRT Effects */
+body::before{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+  pointer-events:none;z-index:9999
+}
+body::after{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.7) 100%);
+  pointer-events:none;z-index:9998
+}
+
+/* Glow text */
+.glow{text-shadow:0 0 8px var(--green),0 0 16px var(--green-glow)}
+.glow-red{text-shadow:0 0 8px var(--red),0 0 16px rgba(255,0,51,0.4)}
+.glow-amber{text-shadow:0 0 8px var(--amber),0 0 16px rgba(255,170,0,0.4)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#050505}
+::-webkit-scrollbar-thumb{background:var(--green-dim);border-radius:0}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);z-index:100
+}
+.login-box{
+  border:1px solid var(--green-dim);background:var(--panel);padding:48px;
+  min-width:400px;max-width:460px;width:90%;
+  box-shadow:0 0 40px rgba(0,255,65,0.1),inset 0 0 40px rgba(0,0,0,0.5);
+  position:relative
+}
+.login-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent)
+}
+.login-title{
+  font-family:var(--font-vt);font-size:28px;text-align:center;
+  color:var(--green);letter-spacing:6px;margin-bottom:8px
+}
+.login-subtitle{font-size:11px;text-align:center;color:var(--green-dim);margin-bottom:36px;letter-spacing:3px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:11px;color:var(--green-dim);margin-bottom:8px;letter-spacing:2px}
+.form-input{
+  width:100%;background:rgba(0,255,65,0.03);border:1px solid var(--green-dim);
+  color:var(--green);font-family:var(--font-mono);font-size:14px;
+  padding:10px 12px;outline:none;transition:all 0.2s
+}
+.form-input:focus{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,65,0.2)}
+.btn{
+  width:100%;background:transparent;border:1px solid var(--green);
+  color:var(--green);font-family:var(--font-mono);font-size:13px;
+  padding:12px;cursor:pointer;letter-spacing:3px;transition:all 0.2s;
+  text-transform:uppercase
+}
+.btn:hover{background:rgba(0,255,65,0.1);box-shadow:0 0 20px rgba(0,255,65,0.2)}
+.btn:active{transform:scale(0.98)}
+.btn-red{border-color:var(--red);color:var(--red)}
+.btn-red:hover{background:rgba(255,0,51,0.1);box-shadow:0 0 20px rgba(255,0,51,0.2)}
+.btn-sm{width:auto;padding:6px 16px;font-size:11px;letter-spacing:1px}
+.btn-xs{width:auto;padding:4px 10px;font-size:10px;letter-spacing:1px}
+.error-msg{color:var(--red);font-size:11px;margin-top:8px;text-align:center;letter-spacing:1px}
+.success-msg{color:var(--green);font-size:11px;margin-top:8px;text-align:center;letter-spacing:1px}
+
+/* Laws Modal */
+#lawsModal{
+  position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:200;
+  display:flex;align-items:center;justify-content:center
+}
+.laws-box{
+  border:1px solid var(--green-dim);background:var(--panel);
+  width:90%;max-width:700px;max-height:80vh;display:flex;flex-direction:column;
+  box-shadow:0 0 60px rgba(0,255,65,0.1)
+}
+.laws-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  font-family:var(--font-vt);font-size:22px;letter-spacing:4px
+}
+.laws-body{flex:1;overflow-y:auto;padding:24px;font-size:12px;line-height:2;color:#aaa}
+.laws-body h3{color:var(--green);font-size:13px;margin:16px 0 8px;letter-spacing:2px}
+.laws-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center}
+.laws-footer input[type=checkbox]{accent-color:var(--green);width:14px;height:14px}
+
+/* ===== MAIN APP ===== */
+#app{display:none;height:100vh;flex-direction:column}
+#app.active{display:flex}
+
+/* Top Bar */
+.topbar{
+  height:42px;background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:16px;flex-shrink:0;
+  position:relative
+}
+.topbar-logo{
+  font-family:var(--font-vt);font-size:20px;color:var(--green);
+  letter-spacing:4px;white-space:nowrap
+}
+.topbar-divider{width:1px;height:24px;background:var(--border)}
+.topbar-user{font-size:11px;color:var(--green-dim);letter-spacing:1px}
+.topbar-rank{font-size:11px;color:var(--amber);letter-spacing:1px}
+.topbar-time{margin-right:auto;font-size:11px;color:var(--green-dim)}
+.topbar-status{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green)
+}
+.topbar-btn{
+  background:transparent;border:1px solid var(--border);color:var(--green-dim);
+  font-family:var(--font-mono);font-size:10px;padding:4px 10px;cursor:pointer;
+  letter-spacing:1px;transition:all 0.2s
+}
+.topbar-btn:hover{border-color:var(--green-dim);color:var(--green)}
+
+/* Layout */
+.main-layout{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.sidebar{
+  width:200px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto
+}
+.sidebar-section{padding:16px 0}
+.sidebar-label{
+  font-size:9px;color:var(--green-dim);letter-spacing:3px;
+  padding:0 16px 8px;text-transform:uppercase
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;
+  font-size:12px;color:#666;letter-spacing:1px;transition:all 0.15s;
+  border-right:2px solid transparent
+}
+.nav-item:hover{color:var(--green-dim);background:rgba(0,255,65,0.03)}
+.nav-item.active{color:var(--green);border-right-color:var(--green);background:rgba(0,255,65,0.05)}
+.nav-item .nav-icon{width:14px;font-size:11px;text-align:center;opacity:0.7}
+.nav-badge{
+  margin-right:auto;background:var(--red);color:#fff;
+  font-size:9px;padding:1px 5px;border-radius:2px
+}
+
+/* Content Area */
+.content{flex:1;overflow-y:auto;padding:0;background:var(--bg)}
+
+/* Panels */
+.panel{display:none;height:100%;padding:24px}
+.panel.active{display:block}
+
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)
+}
+.panel-title{
+  font-family:var(--font-vt);font-size:22px;letter-spacing:3px;color:var(--green)
+}
+
+/* Cards & Grid */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{
+  background:var(--panel);border:1px solid var(--border);padding:16px;
+  position:relative;overflow:hidden
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green-dim),transparent)
+}
+.card-label{font-size:9px;color:#555;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+.card-value{font-family:var(--font-vt);font-size:36px;color:var(--green)}
+.card-sub{font-size:10px;color:var(--green-dim);margin-top:4px}
+
+/* Stat Cards */
+.stat-card{background:var(--panel);border:1px solid var(--border);padding:20px}
+.stat-card .stat-num{font-family:var(--font-vt);font-size:48px;color:var(--green);line-height:1}
+.stat-card .stat-label{font-size:10px;color:#555;letter-spacing:3px;margin-top:8px;text-transform:uppercase}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{
+  text-align:right;padding:10px 14px;font-size:9px;letter-spacing:3px;
+  color:var(--green-dim);border-bottom:1px solid var(--border);text-transform:uppercase
+}
+.data-table td{
+  padding:10px 14px;border-bottom:1px solid rgba(26,42,26,0.5);
+  color:#777;transition:color 0.2s
+}
+.data-table tr:hover td{color:var(--green-dim);background:rgba(0,255,65,0.02)}
+.status-dot{
+  display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px
+}
+.dot-green{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot-red{background:var(--red);box-shadow:0 0 6px var(--red)}
+.dot-amber{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+
+/* Badge / Rank */
+.rank-badge{
+  display:inline-block;padding:2px 8px;border:1px solid;font-size:10px;
+  letter-spacing:1px
+}
+.rank-supreme{border-color:var(--red);color:var(--red)}
+.rank-high{border-color:var(--amber);color:var(--amber)}
+.rank-mid{border-color:var(--green);color:var(--green)}
+.rank-low{border-color:#555;color:#777}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab{
+  padding:8px 20px;font-size:11px;letter-spacing:2px;cursor:pointer;
+  color:#555;border-bottom:2px solid transparent;transition:all 0.2s;
+  text-transform:uppercase
+}
+.tab:hover{color:var(--green-dim)}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* Messages */
+.msg-list{display:flex;flex-direction:column;gap:1px}
+.msg-item{
+  padding:12px 16px;background:var(--panel);border:1px solid var(--border);
+  cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px
+}
+.msg-item:hover{border-color:var(--green-dim);background:rgba(0,255,65,0.03)}
+.msg-item.unread{border-right:3px solid var(--green)}
+.msg-from{font-size:12px;color:var(--green);flex:1}
+.msg-preview{font-size:11px;color:#555;flex:2}
+.msg-time{font-size:10px;color:#444}
+
+/* Chat Window */
+.chat-window{
+  display:flex;flex-direction:column;height:calc(100vh - 200px);
+  background:var(--panel);border:1px solid var(--border)
+}
+.chat-header{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px
+}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+.chat-bubble{
+  max-width:70%;padding:10px 14px;border:1px solid var(--border);font-size:12px;line-height:1.6
+}
+.chat-bubble.mine{background:rgba(0,255,65,0.05);border-color:var(--green-dim);align-self:flex-end}
+.chat-bubble.theirs{background:rgba(255,255,255,0.02);align-self:flex-start}
+.chat-bubble .bubble-from{font-size:9px;color:var(--green-dim);margin-bottom:4px;letter-spacing:1px}
+.chat-bubble .bubble-time{font-size:9px;color:#444;margin-top:4px;text-align:left}
+.chat-input-row{
+  padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px
+}
+.chat-input{
+  flex:1;background:transparent;border:1px solid var(--border);
+  color:var(--green);font-family:var(--font-mono);font-size:12px;
+  padding:8px 12px;outline:none
+}
+.chat-input:focus{border-color:var(--green-dim)}
+
+/* Typing effect */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor::after{content:'_';animation:blink 1s infinite}
+@keyframes typing{from{width:0}to{width:100%}}
+@keyframes glitch{
+  0%{transform:translate(0)}
+  20%{transform:translate(-2px,1px)}
+  40%{transform:translate(2px,-1px)}
+  60%{transform:translate(-1px,2px)}
+  80%{transform:translate(1px,-2px)}
+  100%{transform:translate(0)}
+}
+.glitch-text:hover{animation:glitch 0.3s steps(1)}
+@keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+.scanline-effect{
+  position:fixed;top:0;left:0;width:100%;height:40px;
+  background:linear-gradient(transparent,rgba(0,255,65,0.03),transparent);
+  animation:scanline 8s linear infinite;pointer-events:none;z-index:9997
+}
+@keyframes flicker{0%,100%{opacity:1}50%{opacity:0.98}75%{opacity:0.99}}
+.topbar{animation:flicker 6s infinite}
+
+/* AI Chat */
+.ai-panel{display:flex;flex-direction:column;height:calc(100vh - 160px)}
+.ai-messages{
+  flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
+  background:var(--panel);border:1px solid var(--border)
+}
+.ai-msg{padding:12px 16px;border-right:3px solid;font-size:12px;line-height:1.8;max-width:85%}
+.ai-msg.user{border-color:var(--green-dim);background:rgba(0,255,65,0.03);align-self:flex-end}
+.ai-msg.assistant{border-color:var(--amber);background:rgba(255,170,0,0.03);color:#aaa;align-self:flex-start}
+.ai-msg .ai-tag{font-size:9px;margin-bottom:6px;letter-spacing:2px}
+.ai-msg.user .ai-tag{color:var(--green-dim)}
+.ai-msg.assistant .ai-tag{color:var(--amber)}
+.ai-input-row{padding:12px 0 0;display:flex;gap:8px}
+
+/* GPS Map */
+#cesiumContainer{width:100%;height:calc(100vh - 160px)}
+.map-panel-wrap{height:100%}
+
+/* Forms */
+.form-section{margin-bottom:24px}
+.form-section-title{
+  font-size:10px;color:var(--green-dim);letter-spacing:3px;
+  margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);
+  text-transform:uppercase
+}
+.form-row{display:flex;gap:12px;margin-bottom:14px}
+.form-row .form-group{flex:1;margin-bottom:0}
+textarea.form-input{height:80px;resize:vertical}
+select.form-input{cursor:pointer}
+select.form-input option{background:var(--bg);color:var(--green)}
+
+/* Violations */
+.violation-card{
+  background:rgba(255,0,51,0.05);border:1px solid rgba(255,0,51,0.2);
+  padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:16px
+}
+.violation-severity{
+  font-family:var(--font-vt);font-size:28px;
+  min-width:40px;text-align:center
+}
+.sev-high{color:var(--red)}
+.sev-med{color:var(--amber)}
+.sev-low{color:var(--green-dim)}
+
+/* COMMANDER Panel */
+.commander-panel{
+  background:linear-gradient(135deg,rgba(255,0,51,0.05),transparent);
+  border:1px solid rgba(255,0,51,0.3);padding:20px;margin-bottom:16px
+}
+.commander-title{
+  font-family:var(--font-vt);font-size:20px;color:var(--red);
+  letter-spacing:4px;margin-bottom:16px
+}
+
+/* Alert boxes */
+.alert{
+  padding:12px 16px;border:1px solid;font-size:11px;margin-bottom:12px;
+  display:flex;align-items:center;gap:10px
+}
+.alert-red{border-color:rgba(255,0,51,0.4);color:var(--red);background:rgba(255,0,51,0.05)}
+.alert-green{border-color:rgba(0,255,65,0.3);color:var(--green-dim);background:rgba(0,255,65,0.03)}
+.alert-amber{border-color:rgba(255,170,0,0.4);color:var(--amber);background:rgba(255,170,0,0.05)}
+
+/* Progress bar */
+.progress-bar{height:4px;background:var(--border);margin-top:8px}
+.progress-fill{height:100%;background:var(--green);transition:width 0.4s}
+
+/* User online indicator */
+.online-users-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.user-chip{
+  display:flex;align-items:center;gap:6px;padding:6px 12px;
+  border:1px solid var(--border);font-size:11px
+}
+
+/* System messages */
+#systemOverlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:9000;
+  display:none;align-items:center;justify-content:center
+}
+#systemOverlay.active{display:flex}
+.sys-message{
+  text-align:center;font-family:var(--font-vt);font-size:32px;
+  color:var(--red);letter-spacing:6px;
+  text-shadow:0 0 20px var(--red),0 0 40px rgba(255,0,51,0.4)
+}
+
+/* Scrollable container */
+.scroll-box{overflow-y:auto;max-height:400px}
+
+/* Mini chart bars */
+.mini-chart{display:flex;align-items:flex-end;gap:4px;height:60px}
+.mini-bar{
+  flex:1;background:rgba(0,255,65,0.2);border:1px solid rgba(0,255,65,0.3);
+  transition:height 0.4s;min-width:8px
+}
+
+/* Document card */
+.doc-card{
+  background:var(--panel);border:1px solid var(--border);padding:16px;
+  display:flex;align-items:flex-start;gap:14px;margin-bottom:8px;cursor:pointer;
+  transition:all 0.2s
+}
+.doc-card:hover{border-color:var(--green-dim);background:rgba(0,255,65,0.02)}
+.doc-icon{font-family:var(--font-vt);font-size:28px;color:var(--green-dim);min-width:36px}
+.doc-info{flex:1}
+.doc-title{font-size:13px;color:var(--green);margin-bottom:4px}
+.doc-meta{font-size:10px;color:#555}
+.doc-access{font-size:9px;margin-top:4px;letter-spacing:2px}
+
+/* Request card */
+.req-card{
+  background:var(--panel);border:1px solid var(--border);padding:16px;
+  margin-bottom:8px;position:relative
+}
+.req-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px}
+.req-card.pending::before{background:var(--amber)}
+.req-card.approved::before{background:var(--green)}
+.req-card.rejected::before{background:var(--red)}
+.req-status{font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.req-status.pending{color:var(--amber)}
+.req-status.approved{color:var(--green)}
+.req-status.rejected{color:var(--red)}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{width:160px}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="scanline-effect"></div>
+
+<!-- System Overlay (shutdown etc) -->
+<div id="systemOverlay">
+  <div>
+    <div class="sys-message" id="sysMsg">تم ايقاف النظام باوامر القائد الاعلى</div>
+    <div style="text-align:center;margin-top:24px;font-size:13px;color:#444;letter-spacing:4px">NEXUS COMMAND TERMINATED</div>
+  </div>
+</div>
+
+<!-- Laws Modal -->
+<div id="lawsModal" style="display:none">
+  <div class="laws-box">
+    <div class="laws-header glow">القوانين والشروط - TERMS OF SERVICE</div>
+    <div class="laws-body">
+      <h3>المادة الاولى - السلوك العام</h3>
+      <p>يلتزم جميع الاعضاء بالاحترام الكامل للتسلسل الهرمي العسكري. لا يجوز التجاوز على صلاحيات الرتب العليا بأي شكل من الاشكال.</p>
+      <h3>المادة الثانية - سرية المعلومات</h3>
+      <p>يُحظر تسريب اي معلومات داخلية او مشاركة بيانات الوصول مع اطراف ثالثة. المخالفة تعرض صاحبها للحظر الفوري.</p>
+      <h3>المادة الثالثة - استخدام النظام</h3>
+      <p>يُستخدم النظام لأغراض تنظيمية وادارية فقط. اي استخدام خارج النطاق المحدد يُعدّ مخالفة صريحة.</p>
+      <h3>المادة الرابعة - الطلبات والتراتبية</h3>
+      <p>جميع الطلبات الادارية تسير وفق التسلسل الهرمي المحدد. لا يحق لاي عضو تجاوز مستوى رتبته في ارسال الطلبات.</p>
+      <h3>المادة الخامسة - العقوبات</h3>
+      <p>تراكم المخالفات يؤدي الى: تجميد الحساب، تخفيض الرتبة، الحظر الدائم. القرار النهائي للقائد الاعلى.</p>
+      <h3>المادة السادسة - الخصوصية</h3>
+      <p>المحادثات الخاصة محمية بالكامل. يُحتفظ فقط بالبيانات التقنية العامة (metadata) لاغراض تنظيمية.</p>
+      <h3>المادة السابعة - سلطة القائد الاعلى</h3>
+      <p>يملك القائد الاعلى صلاحيات مطلقة في ادارة النظام، تعديل القوانين، وايقاف الخدمة عند الضرورة. قراراته نهائية وغير قابلة للطعن.</p>
+    </div>
+    <div class="laws-footer">
+      <input type="checkbox" id="lawsCheck">
+      <label for="lawsCheck" style="font-size:11px;color:#777;cursor:pointer;letter-spacing:1px">لقد قرأت وأوافق على جميع البنود والقوانين المذكورة</label>
+      <button class="btn btn-sm" onclick="approveLaws()" style="margin-right:auto">موافق - AGREE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-title glow cursor">NEXUS COMMAND</div>
+    <div class="login-subtitle">SECURE MILITARY MANAGEMENT SYSTEM</div>
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">اسم المستخدم - USERNAME</label>
+        <input type="text" class="form-input" id="loginUser" placeholder="USERNAME" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور - PASSWORD</label>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••">
+      </div>
+      <div id="loginError" class="error-msg" style="display:none"></div>
+      <div style="margin-top:24px">
+        <button class="btn glow" onclick="doLogin()">دخول - ACCESS</button>
+      </div>
+      <div style="margin-top:12px;text-align:center">
+        <span style="font-size:10px;color:#444;cursor:pointer;letter-spacing:1px" onclick="showRegisterForm()">انشاء حساب - REGISTER</span>
+      </div>
+    </div>
+    <div id="registerForm" style="display:none">
+      <div class="form-group">
+        <label class="form-label">اسم المستخدم</label>
+        <input type="text" class="form-input" id="regUser" placeholder="USERNAME">
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور</label>
+        <input type="password" class="form-input" id="regPass" placeholder="MIN 6 CHARACTERS">
+      </div>
+      <div id="regRankGroup" style="display:none">
+        <div class="form-group">
+          <label class="form-label">الرتبة المطلوبة</label>
+          <select class="form-input" id="regRank"></select>
+        </div>
+      </div>
+      <div id="regError" class="error-msg" style="display:none"></div>
+      <div id="regSuccess" class="success-msg" style="display:none"></div>
+      <div style="margin-top:20px;display:flex;gap:8px">
+        <button class="btn glow" onclick="doRegister()">تسجيل - REGISTER</button>
+        <button class="btn btn-sm" onclick="showLoginForm()">عودة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-logo glitch-text glow">NEXUS CMD</div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-status" id="onlineIndicator"></div>
+    <div class="topbar-user" id="topbarUser">---</div>
+    <div class="topbar-rank" id="topbarRank">---</div>
+    <div class="topbar-time" id="topbarTime"></div>
+    <button class="topbar-btn" onclick="toggleLang()">EN / AR</button>
+    <button class="topbar-btn btn-red" onclick="doLogout()">خروج</button>
+  </div>
+
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">الرئيسية</div>
+        <div class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard">
+          <span class="nav-icon">[*]</span> لوحة التحكم
+        </div>
+        <div class="nav-item" onclick="showPanel('stats')" id="nav-stats">
+          <span class="nav-icon">[#]</span> الاحصائيات
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">التواصل</div>
+        <div class="nav-item" onclick="showPanel('messages')" id="nav-messages">
+          <span class="nav-icon">[M]</span> الرسائل
+          <span class="nav-badge" id="msgBadge" style="display:none">0</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('ai')" id="nav-ai">
+          <span class="nav-icon">[A]</span> المساعد الذكي
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">الادارة</div>
+        <div class="nav-item" onclick="showPanel('requests')" id="nav-requests">
+          <span class="nav-icon">[R]</span> الطلبات
+          <span class="nav-badge" id="reqBadge" style="display:none">0</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('documents')" id="nav-documents">
+          <span class="nav-icon">[D]</span> المستندات
+        </div>
+        <div class="nav-item" onclick="showPanel('violations')" id="nav-violations">
+          <span class="nav-icon">[V]</span> المخالفات
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">المرافق</div>
+        <div class="nav-item" onclick="showPanel('map')" id="nav-map">
+          <span class="nav-icon">[G]</span> GPS الخريطة
+        </div>
+        <div class="nav-item" onclick="showPanel('laws')" id="nav-laws">
+          <span class="nav-icon">[L]</span> القوانين
+        </div>
+      </div>
+      <div class="sidebar-section" id="adminSection" style="display:none">
+        <div class="sidebar-label" style="color:var(--red)">القيادة</div>
+        <div class="nav-item" onclick="showPanel('users')" id="nav-users">
+          <span class="nav-icon" style="color:var(--red)">[U]</span> المستخدمون
+        </div>
+        <div class="nav-item" onclick="showPanel('commander')" id="nav-commander">
+          <span class="nav-icon" style="color:var(--red)">[C]</span> لوحة القائد
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Dashboard Panel -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="panel-header">
+          <div class="panel-title glow">لوحة التحكم - COMMAND CENTER</div>
+          <div style="font-size:10px;color:#444;letter-spacing:2px" id="dashDate"></div>
+        </div>
+        <div class="grid-4" style="margin-bottom:20px">
+          <div class="stat-card">
+            <div class="stat-num glow" id="stat-users">0</div>
+            <div class="stat-label">المستخدمون</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num glow" id="stat-requests">0</div>
+            <div class="stat-label">الطلبات</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num glow" id="stat-docs">0</div>
+            <div class="stat-label">المستندات</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num glow" id="stat-online">0</div>
+            <div class="stat-label">متصلون الان</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-label">توزيع الرتب</div>
+            <div id="rankDistChart" class="mini-chart" style="margin-top:12px"></div>
+            <div id="rankDistList" style="margin-top:12px;font-size:10px;color:#555"></div>
+          </div>
+          <div class="card">
+            <div class="card-label">النشاط الاخير</div>
+            <div id="activityLog" style="margin-top:12px;font-size:11px;color:#555;line-height:2.2"></div>
+          </div>
+        </div>
+        <div style="margin-top:16px" id="myViolationsCard"></div>
+        <div style="margin-top:16px" id="myRequestsCard"></div>
+      </div>
+
+      <!-- Stats Panel -->
+      <div class="panel" id="panel-stats">
+        <div class="panel-header">
+          <div class="panel-title glow">الاحصائيات - STATISTICS</div>
+        </div>
+        <div class="grid-4" style="margin-bottom:20px">
+          <div class="stat-card"><div class="stat-num glow" id="st-users">0</div><div class="stat-label">الاعضاء الكلي</div></div>
+          <div class="stat-card"><div class="stat-num glow" id="st-active">0</div><div class="stat-label">حسابات نشطة</div></div>
+          <div class="stat-card"><div class="stat-num glow" id="st-requests">0</div><div class="stat-label">طلبات هذا الشهر</div></div>
+          <div class="stat-card"><div class="stat-num glow" id="st-violations">0</div><div class="stat-label">مخالفات</div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">توزيع الرتب التفصيلي</div>
+          <div id="detailedRankTable" style="margin-top:16px"></div>
+        </div>
+      </div>
+
+      <!-- Messages Panel -->
+      <div class="panel" id="panel-messages">
+        <div class="panel-header">
+          <div class="panel-title glow">الرسائل - MESSAGES</div>
+          <button class="btn btn-sm" onclick="openNewMsg()">رسالة جديدة</button>
+        </div>
+        <div id="msgListView">
+          <div class="tabs">
+            <div class="tab active" onclick="switchMsgTab('inbox',this)">الوارد</div>
+            <div class="tab" onclick="switchMsgTab('sent',this)">المرسلة</div>
+          </div>
+          <div id="msgInbox"></div>
+          <div id="msgSent" style="display:none"></div>
+        </div>
+        <div id="msgChatView" style="display:none">
+          <button class="btn btn-sm" style="margin-bottom:12px" onclick="closeChat()">عودة للقائمة</button>
+          <div class="chat-window">
+            <div class="chat-header">
+              <div style="font-size:12px;color:var(--green)" id="chatWith"></div>
+              <div style="font-size:10px;color:#555" id="chatWithRank"></div>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-row">
+              <input class="chat-input" id="chatInput" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendMsg()">
+              <button class="btn btn-sm" onclick="sendMsg()">ارسال</button>
+            </div>
+          </div>
+        </div>
+        <!-- New Message Modal -->
+        <div id="newMsgModal" style="display:none;margin-top:16px">
+          <div class="card">
+            <div class="card-label">رسالة جديدة</div>
+            <div style="margin-top:12px">
+              <div class="form-group">
+                <label class="form-label">المستلم</label>
+                <select class="form-input" id="msgTo"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">الموضوع</label>
+                <input type="text" class="form-input" id="msgSubject" placeholder="موضوع الرسالة">
+              </div>
+              <div class="form-group">
+                <label class="form-label">الرسالة</label>
+                <textarea class="form-input" id="msgBody" placeholder="محتوى الرسالة..."></textarea>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn btn-sm glow" onclick="sendNewMsg()">ارسال</button>
+                <button class="btn btn-sm btn-red" onclick="closeNewMsg()">الغاء</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Panel -->
+      <div class="panel" id="panel-ai">
+        <div class="panel-header">
+          <div class="panel-title glow">المساعد الذكي - AI INVESTIGATOR</div>
+          <div style="font-size:10px;color:var(--amber);letter-spacing:2px">NEXUS AI v2.0</div>
+        </div>
+        <div class="alert alert-amber" style="margin-bottom:16px">
+          المساعد الذكي يعمل كمستشار فقط. القرار النهائي دائما بشري.
+        </div>
+        <div class="ai-panel">
+          <div class="ai-messages" id="aiMessages">
+            <div class="ai-msg assistant">
+              <div class="ai-tag">NEXUS AI</div>
+              مرحبا. انا مساعد NEXUS AI. يمكنني مساعدتك في الاستفسارات الادارية والتحليلية. كيف يمكنني مساعدتك؟
+            </div>
+          </div>
+          <div class="ai-input-row">
+            <input class="chat-input" id="aiInput" placeholder="اكتب سؤالك هنا..." onkeydown="if(event.key==='Enter')sendAiMsg()">
+            <button class="btn btn-sm" onclick="sendAiMsg()">ارسال</button>
+            <button class="btn btn-xs" onclick="clearAiChat()" style="color:#555;border-color:#333">مسح</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Requests Panel -->
+      <div class="panel" id="panel-requests">
+        <div class="panel-header">
+          <div class="panel-title glow">الطلبات الادارية - REQUESTS</div>
+          <button class="btn btn-sm" onclick="openNewRequest()">طلب جديد</button>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchReqTab('mine',this)">طلباتي</div>
+          <div class="tab" onclick="switchReqTab('incoming',this)" id="incomingTab" style="display:none">واردة</div>
+        </div>
+        <div id="reqMine"></div>
+        <div id="reqIncoming" style="display:none"></div>
+        <!-- New Request Form -->
+        <div id="newReqForm" style="display:none;margin-top:16px">
+          <div class="card">
+            <div class="card-label">تقديم طلب جديد</div>
+            <div style="margin-top:12px">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">نوع الطلب</label>
+                  <select class="form-input" id="reqType">
+                    <option value="leave">طلب اجازة</option>
+                    <option value="promotion">طلب ترقية</option>
+                    <option value="transfer">طلب نقل</option>
+                    <option value="permission">طلب صلاحية مؤقتة</option>
+                    <option value="clarification">طلب توضيح اداري</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">التفاصيل</label>
+                <textarea class="form-input" id="reqDetails" placeholder="اشرح طلبك بالتفصيل..."></textarea>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn btn-sm glow" onclick="submitRequest()">تقديم الطلب</button>
+                <button class="btn btn-sm btn-red" onclick="closeNewRequest()">الغاء</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Panel -->
+      <div class="panel" id="panel-documents">
+        <div class="panel-header">
+          <div class="panel-title glow">مركز المستندات - DOCUMENT CENTER</div>
+          <button class="btn btn-sm" id="addDocBtn" style="display:none" onclick="openAddDoc()">اضافة مستند</button>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchDocTab('all',this)">الكل</div>
+          <div class="tab" onclick="switchDocTab('general',this)">عام</div>
+          <div class="tab" onclick="switchDocTab('internal',this)">داخلي</div>
+          <div class="tab" onclick="switchDocTab('secret',this)">سري</div>
+        </div>
+        <div id="docList"></div>
+        <!-- Add Doc Form -->
+        <div id="addDocForm" style="display:none;margin-top:16px">
+          <div class="card">
+            <div class="card-label">اضافة مستند</div>
+            <div style="margin-top:12px">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">العنوان</label>
+                  <input type="text" class="form-input" id="docTitle" placeholder="عنوان المستند">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">التصنيف</label>
+                  <select class="form-input" id="docClass">
+                    <option value="general">عام</option>
+                    <option value="internal">داخلي</option>
+                    <option value="secret">سري</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">الرتبة الادنى للوصول</label>
+                  <select class="form-input" id="docMinRank"></select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">الوصف / المحتوى</label>
+                <textarea class="form-input" id="docContent" style="height:120px" placeholder="محتوى المستند..."></textarea>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn btn-sm glow" onclick="submitDoc()">حفظ المستند</button>
+                <button class="btn btn-sm btn-red" onclick="closeAddDoc()">الغاء</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Violations Panel -->
+      <div class="panel" id="panel-violations">
+        <div class="panel-header">
+          <div class="panel-title glow" style="color:var(--red)">المخالفات - VIOLATIONS</div>
+          <button class="btn btn-sm btn-red" id="addViolBtn" style="display:none" onclick="openAddViolation()">تسجيل مخالفة</button>
+        </div>
+        <div id="myViolList"></div>
+        <div id="allViolList" style="display:none"></div>
+        <!-- Add Violation Form -->
+        <div id="addViolForm" style="display:none;margin-top:16px">
+          <div class="card" style="border-color:rgba(255,0,51,0.3)">
+            <div class="card-label" style="color:var(--red)">تسجيل مخالفة جديدة</div>
+            <div style="margin-top:12px">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">المخالف</label>
+                  <select class="form-input" id="violUser"></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">نوع المخالفة</label>
+                  <select class="form-input" id="violType">
+                    <option value="غياب غير مبرر">غياب غير مبرر</option>
+                    <option value="تجاوز الصلاحيات">تجاوز الصلاحيات</option>
+                    <option value="مخالفة الاوامر">مخالفة الاوامر</option>
+                    <option value="سوء السلوك">سوء السلوك</option>
+                    <option value="تسريب معلومات">تسريب معلومات</option>
+                    <option value="اخرى">اخرى</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">درجة الخطورة</label>
+                  <select class="form-input" id="violSeverity">
+                    <option value="low">منخفضة</option>
+                    <option value="med">متوسطة</option>
+                    <option value="high">عالية</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">التفاصيل</label>
+                <textarea class="form-input" id="violDetails" placeholder="تفاصيل المخالفة..."></textarea>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn btn-sm btn-red" onclick="submitViolation()">تسجيل المخالفة</button>
+                <button class="btn btn-sm" onclick="closeAddViolation()">الغاء</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Panel -->
+      <div class="panel" id="panel-map">
+        <div class="panel-header">
+          <div class="panel-title glow">الخريطة التكتيكية - GPS TACTICAL MAP</div>
+          <div style="font-size:10px;color:var(--amber);letter-spacing:2px">3D HOLOGRAM MODE</div>
+        </div>
+        <div id="mapContainer" style="border:1px solid var(--border);position:relative">
+          <div id="cesiumContainer" style="width:100%;height:calc(100vh - 180px)"></div>
+        </div>
+      </div>
+
+      <!-- Laws Panel -->
+      <div class="panel" id="panel-laws">
+        <div class="panel-header">
+          <div class="panel-title glow">القوانين - LAWS & REGULATIONS</div>
+          <button class="btn btn-sm btn-red" id="editLawsBtn" style="display:none" onclick="openEditLaws()">تعديل القوانين</button>
+        </div>
+        <div id="lawsContent"></div>
+      </div>
+
+      <!-- Users Panel (Admin) -->
+      <div class="panel" id="panel-users">
+        <div class="panel-header">
+          <div class="panel-title glow">ادارة المستخدمين - USER MANAGEMENT</div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div class="card-label" style="margin-bottom:0">المستخدمون المتصلون الان</div>
+          </div>
+          <div id="onlineUsersGrid" class="online-users-grid"></div>
+        </div>
+        <div class="card">
+          <div class="card-label" style="margin-bottom:16px">جميع الحسابات</div>
+          <table class="data-table" id="usersTable">
+            <thead>
+              <tr>
+                <th>المستخدم</th>
+                <th>الرتبة</th>
+                <th>الحالة</th>
+                <th>آخر دخول</th>
+                <th>الاجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Commander Panel -->
+      <div class="panel" id="panel-commander">
+        <div class="panel-header">
+          <div class="panel-title glow-red">لوحة القائد الاعلى - SUPREME COMMAND</div>
+        </div>
+        <div class="commander-panel">
+          <div class="commander-title">سجل القرارات السيادية</div>
+          <div id="commandLog" style="font-size:11px;color:#666;line-height:2.2;max-height:200px;overflow-y:auto"></div>
+        </div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-label" style="color:var(--red)">عمليات سيادية</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              <button class="btn btn-red" onclick="forceLawsReapproval()">فرض اعادة الموافقة على القوانين</button>
+              <button class="btn" onclick="pauseSystem(false)">ايقاف مؤقت للنظام</button>
+              <button class="btn btn-red" onclick="if(confirm('تحذير: هذه العملية ستحذف جميع البيانات. هل انت متاكد؟'))destroySystem()">التدمير الذاتي</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-label">ادارة الرتب</div>
+            <div style="margin-top:12px">
+              <div class="form-group">
+                <label class="form-label">المستخدم</label>
+                <select class="form-input" id="rankChangeUser"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">الرتبة الجديدة</label>
+                <select class="form-input" id="rankChangeRank"></select>
+              </div>
+              <button class="btn btn-sm btn-red" style="margin-top:8px" onclick="changeUserRank()">تغيير الرتبة</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">طلبات معلقة للمراجعة</div>
+          <div id="pendingRequestsAdmin" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cesium JS -->
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+<script>
+// ============================================================
+// DATA STORE (localStorage simulation in-memory)
+// ============================================================
+const RANKS = [
+  'القائد الاعلى','فريق اول','فريق','لواء','عميد','عقيد',
+  'مقدم','رائد','نقيب','ملازم اول','ملازم',
+  'رئيس رقباء','رقيب اول','رقيب','وكيل رقيب','عريف','جندي اول','جندي'
+];
+const RANK_LEVEL = {};
+RANKS.forEach((r,i)=>RANK_LEVEL[r]=RANKS.length-1-i);
+
+// Rank categories
+const canManageUsers = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['لواء'];
+const canCreateAccount = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['لواء'];
+const canApproveRequests = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['ملازم'];
+const isCommander = (rank)=>rank==='القائد الاعلى';
+const isHighCommand = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['عقيد'];
+const canSeeSecretDocs = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['عقيد'];
+const canSeeInternalDocs = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['ملازم'];
+const canAddViolation = (rank)=>RANK_LEVEL[rank]>=RANK_LEVEL['نقيب'];
+
+// State
+let state = {
+  users:[],
+  messages:[],
+  requests:[],
+  documents:[],
+  violations:[],
+  laws: getLaws(),
+  commandLog:[],
+  systemPaused:false,
+  loginLogs:[],
+  lawsVersion:1
+};
+let currentUser = null;
+let currentChatUser = null;
+let cesiumViewer = null;
+let aiHistory = [];
+
+function getLaws(){
+  return `
+القانون الاول: يلتزم جميع الاعضاء بالانضباط العسكري والطاعة الكاملة لاوامر القيادة.
+القانون الثاني: يُحظر تسريب المعلومات السرية للاطراف الخارجية تحت اي ظرف.
+القانون الثالث: يجب احترام التسلسل القيادي في جميع المراسلات والطلبات الادارية.
+القانون الرابع: استخدام النظام محصور للاغراض الرسمية المعتمدة فقط.
+القانون الخامس: اي سوء استخدام للصلاحيات يعرض صاحبه للعقوبات الانضباطية الفورية.
+القانون السادس: المحادثات الخاصة محمية، ويُحظر على اي طرف ثالث الاطلاع عليها.
+القانون السابع: قرارات القائد الاعلى نهائية وملزمة وغير قابلة للطعن.
+  `.trim();
+}
+
+// Init default data
+function initData(){
+  // Create default Commander account
+  if(!state.users.find(u=>u.username==='the_leader')){
+    state.users.push({
+      id:'user_0',
+      username:'the_leader',
+      password:'14113',
+      rank:'القائد الاعلى',
+      isActive:true,
+      isOnline:false,
+      createdAt:new Date().toISOString(),
+      lastLogin:null,
+      lawsApproved:true,
+      lawsVersion:1,
+      violations:[]
+    });
+  }
+  // Sample users
+  if(state.users.length<3){
+    state.users.push(
+      {id:'user_1',username:'general_ali',password:'123456',rank:'لواء',isActive:true,isOnline:false,createdAt:new Date().toISOString(),lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+      {id:'user_2',username:'captain_omar',password:'123456',rank:'نقيب',isActive:true,isOnline:false,createdAt:new Date().toISOString(),lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]}
+    );
+    // Sample docs
+    state.documents.push(
+      {id:'doc_1',title:'دليل الانضباط العسكري',class:'general',content:'يتضمن هذا الدليل الارشادات الاساسية للانضباط والسلوك العسكري داخل المنظومة...',minRank:'جندي',addedBy:'the_leader',date:new Date().toISOString(),accessLog:[]},
+      {id:'doc_2',title:'تقرير العمليات الداخلية',class:'internal',content:'هذا التقرير مخصص للضباط ويحتوي على تفاصيل الخطط التنظيمية الداخلية...',minRank:'ملازم',addedBy:'the_leader',date:new Date().toISOString(),accessLog:[]},
+      {id:'doc_3',title:'بروتوكول الامن المعلوماتي',class:'secret',content:'بروتوكول سري للتعامل مع الحوادث الامنية وانتهاكات البيانات...',minRank:'عقيد',addedBy:'the_leader',date:new Date().toISOString(),accessLog:[]}
+    );
+    state.requests.push(
+      {id:'req_1',from:'captain_omar',type:'promotion',details:'اطلب الترقية الى رتبة رائد بناء على الخدمة المتميزة...',status:'pending',date:new Date().toISOString(),response:''}
+    );
+  }
+  saveState();
+}
+
+function saveState(){
+  try{localStorage.setItem('nexus_state',JSON.stringify(state))}catch(e){}
+}
+function loadState(){
+  try{
+    const s = localStorage.getItem('nexus_state');
+    if(s){state=JSON.parse(s)}
+  }catch(e){}
+  initData();
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const user = state.users.find(x=>x.username===u && x.password===p);
+  if(!user){
+    showError('loginError','خطا في اسم المستخدم او كلمة المرور - ACCESS DENIED');
+    return;
+  }
+  if(!user.isActive){
+    showError('loginError','الحساب موقوف - ACCOUNT SUSPENDED');
+    return;
+  }
+  if(state.systemPaused && !isCommander(user.rank)){
+    showError('loginError','النظام موقوف مؤقتا - SYSTEM PAUSED');
+    return;
+  }
+  // Check laws
+  if(!user.lawsApproved || user.lawsVersion < state.lawsVersion){
+    currentUser = user;
+    showLawsModal();
+    return;
+  }
+  completeLogin(user);
+}
+
+function completeLogin(user){
+  currentUser = user;
+  user.isOnline = true;
+  user.lastLogin = new Date().toISOString();
+  state.loginLogs.push({user:user.username,action:'login',time:new Date().toISOString()});
+  saveState();
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').classList.add('active');
+  setupUI();
+  showPanel('dashboard');
+  startClock();
+}
+
+function doLogout(){
+  if(currentUser){
+    currentUser.isOnline = false;
+    state.loginLogs.push({user:currentUser.username,action:'logout',time:new Date().toISOString()});
+    saveState();
+  }
+  currentUser = null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+function showRegisterForm(){
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('registerForm').style.display='block';
+  // Populate rank selector if elevated
+  const rankSel = document.getElementById('regRank');
+  rankSel.innerHTML = RANKS.map(r=>`<option value="${r}">${r}</option>`).join('');
+}
+function showLoginForm(){
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('registerForm').style.display='none';
+}
+
+function doRegister(){
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  // Check if called from commander context (high rank creating account)
+  const creatorRank = currentUser ? currentUser.rank : null;
+  if(state.users.find(x=>x.username===u)){
+    showError('regError','اسم المستخدم موجود مسبقا');return;
+  }
+  if(u.length<3){showError('regError','اسم المستخدم قصير جدا');return;}
+  if(p.length<6){showError('regError','كلمة المرور اقل من 6 احرف');return;}
+  
+  let rank = 'جندي';
+  if(creatorRank && canCreateAccount(creatorRank)){
+    rank = document.getElementById('regRank').value || 'جندي';
+    document.getElementById('regRankGroup').style.display='block';
+  }
+  
+  const newUser = {
+    id:'user_'+Date.now(),
+    username:u,password:p,rank,
+    isActive:true,isOnline:false,
+    createdAt:new Date().toISOString(),lastLogin:null,
+    lawsApproved:false,lawsVersion:0,violations:[]
+  };
+  state.users.push(newUser);
+  saveState();
+  document.getElementById('regSuccess').style.display='block';
+  document.getElementById('regSuccess').textContent='تم انشاء الحساب بنجاح';
+  setTimeout(showLoginForm,1500);
+}
+
+// Laws
+function showLawsModal(){
+  document.getElementById('lawsModal').style.display='flex';
+}
+function approveLaws(){
+  const checked = document.getElementById('lawsCheck').checked;
+  if(!checked){alert('يجب قراءة والموافقة على القوانين اولا');return;}
+  if(currentUser){
+    currentUser.lawsApproved=true;
+    currentUser.lawsVersion=state.lawsVersion;
+    saveState();
+    document.getElementById('lawsModal').style.display='none';
+    completeLogin(currentUser);
+  }
+}
+
+// ============================================================
+// UI SETUP
+// ============================================================
+function setupUI(){
+  document.getElementById('topbarUser').textContent = currentUser.username;
+  document.getElementById('topbarRank').textContent = currentUser.rank;
+  // Admin sections
+  const isAdmin = canManageUsers(currentUser.rank) || isCommander(currentUser.rank);
+  document.getElementById('adminSection').style.display = isAdmin ? 'block':'none';
+  // Show register rank option
+  if(canCreateAccount(currentUser.rank)){
+    document.getElementById('regRankGroup').style.display='block';
+  }
+  populateSelects();
+  updateBadges();
+}
+
+function populateSelects(){
+  // Message recipients
+  const msgTo = document.getElementById('msgTo');
+  if(msgTo){
+    msgTo.innerHTML = state.users
+      .filter(u=>u.username!==currentUser.username && u.isActive)
+      .map(u=>`<option value="${u.username}">${u.username} - ${u.rank}</option>`).join('');
+  }
+  // Rank change selects
+  const rcu = document.getElementById('rankChangeUser');
+  if(rcu) rcu.innerHTML = state.users.filter(u=>u.username!==currentUser.username).map(u=>`<option value="${u.username}">${u.username} - ${u.rank}</option>`).join('');
+  const rcr = document.getElementById('rankChangeRank');
+  if(rcr) rcr.innerHTML = RANKS.map(r=>`<option value="${r}">${r}</option>`).join('');
+  // Violation user
+  const vu = document.getElementById('violUser');
+  if(vu) vu.innerHTML = state.users.filter(u=>u.username!==currentUser.username && u.isActive).map(u=>`<option value="${u.username}">${u.username} - ${u.rank}</option>`).join('');
+  // Doc min rank
+  const dmr = document.getElementById('docMinRank');
+  if(dmr) dmr.innerHTML = [...RANKS].reverse().map(r=>`<option value="${r}">${r}</option>`).join('');
+  // Register rank
+  const rr = document.getElementById('regRank');
+  if(rr) rr.innerHTML = RANKS.map(r=>`<option value="${r}">${r}</option>`).join('');
+}
+
+function updateBadges(){
+  const unread = state.messages.filter(m=>m.to===currentUser.username && !m.read).length;
+  const badge = document.getElementById('msgBadge');
+  if(unread>0){badge.style.display='inline-block';badge.textContent=unread;}
+  else badge.style.display='none';
+  
+  const pending = state.requests.filter(r=>
+    r.status==='pending' && 
+    r.from!==currentUser.username &&
+    canApproveRequests(currentUser.rank)
+  ).length;
+  const rbadge = document.getElementById('reqBadge');
+  if(pending>0){rbadge.style.display='inline-block';rbadge.textContent=pending;}
+  else rbadge.style.display='none';
+}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  const nav = document.getElementById('nav-'+name);
+  if(nav) nav.classList.add('active');
+  renderPanel(name);
+}
+
+function renderPanel(name){
+  switch(name){
+    case 'dashboard': renderDashboard();break;
+    case 'stats': renderStats();break;
+    case 'messages': renderMessages();break;
+    case 'requests': renderRequests();break;
+    case 'documents': renderDocuments('all');break;
+    case 'violations': renderViolations();break;
+    case 'users': renderUsers();break;
+    case 'commander': renderCommander();break;
+    case 'laws': renderLaws();break;
+    case 'map': initMap();break;
+    case 'ai': /* stays as is */break;
+  }
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(){
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('stat-users').textContent = state.users.filter(u=>u.isActive).length;
+  document.getElementById('stat-requests').textContent = state.requests.length;
+  document.getElementById('stat-docs').textContent = state.documents.length;
+  document.getElementById('stat-online').textContent = state.users.filter(u=>u.isOnline).length;
+  
+  // Rank distribution chart
+  const rankCounts = {};
+  state.users.forEach(u=>{rankCounts[u.rank]=(rankCounts[u.rank]||0)+1});
+  const chartDiv = document.getElementById('rankDistChart');
+  const listDiv = document.getElementById('rankDistList');
+  chartDiv.innerHTML = Object.entries(rankCounts).map(([r,c])=>{
+    const h = Math.max(10, (c/state.users.length)*100);
+    return `<div class="mini-bar" style="height:${h}%" title="${r}: ${c}"></div>`;
+  }).join('');
+  listDiv.innerHTML = Object.entries(rankCounts).map(([r,c])=>`<span style="color:var(--green-dim)">${r}</span>: <span>${c}</span> &nbsp;`).join('');
+  
+  // Activity log
+  const logs = state.loginLogs.slice(-8).reverse();
+  document.getElementById('activityLog').innerHTML = logs.map(l=>
+    `<div><span style="color:var(--green)">${l.user}</span> - ${l.action==='login'?'<span style="color:var(--green)">تسجيل دخول</span>':'<span style="color:var(--red)">خروج</span>'} - <span style="color:#444">${new Date(l.time).toLocaleTimeString('ar')}</span></div>`
+  ).join('') || '<div style="color:#333">لا يوجد نشاط</div>';
+  
+  // My violations
+  const myViols = state.violations.filter(v=>v.targetUser===currentUser.username);
+  if(myViols.length>0){
+    document.getElementById('myViolationsCard').innerHTML = `
+      <div class="alert alert-red">لديك ${myViols.length} مخالفة مسجلة. تراكم المخالفات قد يؤدي الى تجميد الحساب.</div>`;
+  }
+  
+  // My pending requests
+  const myPending = state.requests.filter(r=>r.from===currentUser.username && r.status==='pending');
+  if(myPending.length>0){
+    document.getElementById('myRequestsCard').innerHTML = `
+      <div class="alert alert-amber">لديك ${myPending.length} طلب(ات) قيد الانتظار.</div>`;
+  }
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function renderStats(){
+  document.getElementById('st-users').textContent = state.users.length;
+  document.getElementById('st-active').textContent = state.users.filter(u=>u.isActive).length;
+  document.getElementById('st-requests').textContent = state.requests.length;
+  document.getElementById('st-violations').textContent = state.violations.length;
+  
+  const rankCounts = {};
+  RANKS.forEach(r=>{rankCounts[r]=0});
+  state.users.forEach(u=>{rankCounts[u.rank]=(rankCounts[u.rank]||0)+1});
+  
+  document.getElementById('detailedRankTable').innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>الرتبة</th><th>العدد</th><th>النسبة</th></tr></thead>
+      <tbody>${RANKS.filter(r=>rankCounts[r]>0).map(r=>`
+        <tr>
+          <td>${r}</td>
+          <td style="color:var(--green)">${rankCounts[r]}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar" style="width:100px">
+                <div class="progress-fill" style="width:${(rankCounts[r]/state.users.length*100).toFixed(0)}%"></div>
+              </div>
+              <span style="font-size:10px;color:#555">${(rankCounts[r]/state.users.length*100).toFixed(0)}%</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ============================================================
+// MESSAGES
+// ============================================================
+function renderMessages(){
+  renderInbox();
+  renderSent();
+  populateSelects();
+}
+
+function renderInbox(){
+  const inbox = state.messages.filter(m=>m.to===currentUser.username);
+  const div = document.getElementById('msgInbox');
+  if(inbox.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد رسائل واردة</div>';return;}
+  div.innerHTML = inbox.slice().reverse().map(m=>`
+    <div class="msg-item ${!m.read?'unread':''}" onclick="openChat('${m.from}')">
+      <div class="status-dot ${!m.read?'dot-green':''}"></div>
+      <div class="msg-from">${m.from}</div>
+      <div class="msg-preview">${m.subject}</div>
+      <div class="msg-time">${new Date(m.date).toLocaleDateString('ar')}</div>
+    </div>`).join('');
+}
+
+function renderSent(){
+  const sent = state.messages.filter(m=>m.from===currentUser.username);
+  const div = document.getElementById('msgSent');
+  if(sent.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد رسائل مرسلة</div>';return;}
+  div.innerHTML = sent.slice().reverse().map(m=>`
+    <div class="msg-item" onclick="openChat('${m.to}')">
+      <div class="msg-from">الى: ${m.to}</div>
+      <div class="msg-preview">${m.subject}</div>
+      <div class="msg-time">${new Date(m.date).toLocaleDateString('ar')}</div>
+    </div>`).join('');
+}
+
+function switchMsgTab(tab, el){
+  document.querySelectorAll('#panel-messages .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('msgInbox').style.display = tab==='inbox'?'block':'none';
+  document.getElementById('msgSent').style.display = tab==='sent'?'block':'none';
+}
+
+function openChat(username){
+  if(!username) return;
+  const user = state.users.find(u=>u.username===username);
+  if(!user) return;
+  currentChatUser = username;
+  document.getElementById('msgListView').style.display='none';
+  document.getElementById('msgChatView').style.display='block';
+  document.getElementById('newMsgModal').style.display='none';
+  document.getElementById('chatWith').textContent = username;
+  document.getElementById('chatWithRank').textContent = user.rank;
+  // Mark as read
+  state.messages.filter(m=>m.from===username&&m.to===currentUser.username).forEach(m=>m.read=true);
+  saveState();updateBadges();
+  renderChatMessages();
+}
+
+function renderChatMessages(){
+  const msgs = state.messages.filter(m=>
+    (m.from===currentUser.username&&m.to===currentChatUser)||
+    (m.from===currentChatUser&&m.to===currentUser.username)
+  ).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  
+  const div = document.getElementById('chatMessages');
+  div.innerHTML = msgs.map(m=>`
+    <div class="chat-bubble ${m.from===currentUser.username?'mine':'theirs'}">
+      <div class="bubble-from">${m.from} - ${m.subject}</div>
+      ${m.body}
+      <div class="bubble-time">${new Date(m.date).toLocaleTimeString('ar')}</div>
+    </div>`).join('');
+  div.scrollTop=div.scrollHeight;
+}
+
+function sendMsg(){
+  const body = document.getElementById('chatInput').value.trim();
+  if(!body||!currentChatUser)return;
+  state.messages.push({
+    id:'msg_'+Date.now(),
+    from:currentUser.username,
+    to:currentChatUser,
+    subject:'محادثة',
+    body,
+    date:new Date().toISOString(),
+    read:false
+  });
+  document.getElementById('chatInput').value='';
+  saveState();renderChatMessages();
+}
+
+function closeChat(){
+  currentChatUser=null;
+  document.getElementById('msgListView').style.display='block';
+  document.getElementById('msgChatView').style.display='none';
+}
+
+function openNewMsg(){
+  document.getElementById('newMsgModal').style.display='block';
+  populateSelects();
+}
+function closeNewMsg(){document.getElementById('newMsgModal').style.display='none';}
+
+function sendNewMsg(){
+  const to = document.getElementById('msgTo').value;
+  const subj = document.getElementById('msgSubject').value.trim();
+  const body = document.getElementById('msgBody').value.trim();
+  if(!to||!subj||!body){alert('يرجى ملء جميع الحقول');return;}
+  state.messages.push({
+    id:'msg_'+Date.now(),from:currentUser.username,to,subject:subj,body,
+    date:new Date().toISOString(),read:false
+  });
+  saveState();closeNewMsg();
+  document.getElementById('msgSubject').value='';
+  document.getElementById('msgBody').value='';
+  updateBadges();
+  alert('تم ارسال الرسالة بنجاح');
+}
+
+// ============================================================
+// AI ASSISTANT
+// ============================================================
+const AI_SYSTEM_PROMPT = `انت NEXUS AI، مساعد اداري ذكي لنظام القيادة العسكرية. مهمتك تقديم المساعدة الادارية والتحليلية.
+قواعدك:
+- انت مستشار فقط، لا تصدر قرارات
+- القرار النهائي دائما بشري
+- تتحدث بالعربية بشكل رسمي واحترافي
+- لا تقدم تقارير اسبوعية او تحليلات للاعضاء او تنبيهات سلوك غير طبيعي الا لمن رتبته عقيد فما فوق او القائد الاعلى
+- للمستخدمين العاديين: قدم مساعدة عامة فقط في الاستفسارات الادارية
+- ابدأ ردودك بـ [NEXUS AI] دائما`;
+
+async function sendAiMsg(){
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if(!text)return;
+  
+  // Check if asking for restricted features
+  const restrictedKeywords = ['تقرير اسبوعي','تحليل الاعضاء','سلوك غير طبيعي','يلخص القضية','درجة الخطورة'];
+  const isRestricted = restrictedKeywords.some(k=>text.includes(k));
+  if(isRestricted && !isHighCommand(currentUser.rank) && !isCommander(currentUser.rank)){
+    appendAiMsg('user',text);
+    appendAiMsg('assistant','[NEXUS AI] عذرا، هذه الميزة محصورة على رتبة عقيد فما فوق. لا يمكنك الوصول اليها.');
+    input.value='';return;
+  }
+  
+  appendAiMsg('user',text);
+  input.value='';
+  
+  // Show typing indicator
+  const typingId = 'ai-typing-'+Date.now();
+  const aiMsgs = document.getElementById('aiMessages');
+  aiMsgs.innerHTML += `<div class="ai-msg assistant" id="${typingId}"><div class="ai-tag">NEXUS AI</div><span class="cursor">جاري التحليل</span></div>`;
+  aiMsgs.scrollTop=aiMsgs.scrollHeight;
+  
+  // Build context
+  let contextNote = '';
+  if(isHighCommand(currentUser.rank)||isCommander(currentUser.rank)){
+    const summary = `بيانات النظام: ${state.users.length} مستخدم، ${state.requests.filter(r=>r.status==='pending').length} طلبات معلقة، ${state.violations.length} مخالفة مسجلة.`;
+    contextNote = `\n\nالمستخدم الحالي: ${currentUser.rank} / بيانات النظام: ${summary}`;
+  } else {
+    contextNote = `\nالمستخدم: ${currentUser.username} - الرتبة: ${currentUser.rank}`;
+  }
+  
+  aiHistory.push({role:'user',content:text});
+  
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:AI_SYSTEM_PROMPT+contextNote,
+        messages:aiHistory.slice(-10)
+      })
+    });
+    const data = await resp.json();
+    const reply = data.content?.map(c=>c.text||'').join('') || 'لم اتمكن من معالجة طلبك';
+    aiHistory.push({role:'assistant',content:reply});
+    document.getElementById(typingId)?.remove();
+    appendAiMsg('assistant',reply);
+  }catch(e){
+    document.getElementById(typingId)?.remove();
+    appendAiMsg('assistant','[NEXUS AI] حدث خطا في الاتصال. يرجى المحاولة لاحقا.');
+  }
+}
+
+function appendAiMsg(role,text){
+  const div = document.getElementById('aiMessages');
+  const tag = role==='user'?currentUser.username:'NEXUS AI';
+  div.innerHTML += `<div class="ai-msg ${role}"><div class="ai-tag">${tag}</div>${escHtml(text)}</div>`;
+  div.scrollTop=div.scrollHeight;
+}
+
+function clearAiChat(){
+  aiHistory=[];
+  document.getElementById('aiMessages').innerHTML=`
+    <div class="ai-msg assistant">
+      <div class="ai-tag">NEXUS AI</div>
+      تم مسح المحادثة. كيف يمكنني مساعدتك؟
+    </div>`;
+}
+
+// ============================================================
+// REQUESTS
+// ============================================================
+function renderRequests(){
+  renderMyRequests();
+  if(canApproveRequests(currentUser.rank)){
+    document.getElementById('incomingTab').style.display='block';
+    renderIncomingRequests();
+  }
+}
+
+function renderMyRequests(){
+  const mine = state.requests.filter(r=>r.from===currentUser.username);
+  const div = document.getElementById('reqMine');
+  if(mine.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد طلبات</div>';return;}
+  div.innerHTML = mine.slice().reverse().map(r=>`
+    <div class="req-card ${r.status}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="color:var(--green);font-size:12px">${getReqTypeName(r.type)}</span>
+        <span class="req-status ${r.status}">${getStatusName(r.status)}</span>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:6px">${r.details}</div>
+      ${r.response?`<div style="font-size:11px;color:var(--amber);border-right:2px solid var(--amber);padding-right:8px">الرد: ${r.response}</div>`:''}
+      <div style="font-size:10px;color:#444;margin-top:6px">${new Date(r.date).toLocaleDateString('ar')}</div>
+    </div>`).join('');
+}
+
+function renderIncomingRequests(){
+  const incoming = state.requests.filter(r=>r.status==='pending' && r.from!==currentUser.username);
+  const div = document.getElementById('reqIncoming');
+  if(incoming.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد طلبات واردة</div>';return;}
+  div.innerHTML = incoming.map(r=>`
+    <div class="req-card pending" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="color:var(--green);font-size:12px">${getReqTypeName(r.type)} - ${r.from}</span>
+        <span class="req-status pending">معلق</span>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:10px">${r.details}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-xs glow" onclick="processRequest('${r.id}','approved')">قبول</button>
+        <button class="btn btn-xs btn-red" onclick="processRequest('${r.id}','rejected')">رفض</button>
+      </div>
+    </div>`).join('');
+}
+
+function processRequest(id, status){
+  const req = state.requests.find(r=>r.id===id);
+  if(!req)return;
+  const resp = prompt(status==='approved'?'ملاحظات القبول:':'سبب الرفض:','');
+  req.status=status;
+  req.response=resp||'';
+  if(isCommander(currentUser.rank)){
+    state.commandLog.push({action:`${status==='approved'?'قبول':'رفض'} طلب من ${req.from}`,date:new Date().toISOString()});
+  }
+  saveState();renderRequests();
+}
+
+function switchReqTab(tab,el){
+  document.querySelectorAll('#panel-requests .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('reqMine').style.display=tab==='mine'?'block':'none';
+  document.getElementById('reqIncoming').style.display=tab==='incoming'?'block':'none';
+}
+
+function openNewRequest(){document.getElementById('newReqForm').style.display='block';}
+function closeNewRequest(){document.getElementById('newReqForm').style.display='none';}
+function submitRequest(){
+  const type=document.getElementById('reqType').value;
+  const details=document.getElementById('reqDetails').value.trim();
+  if(!details){alert('يرجى ادخال تفاصيل الطلب');return;}
+  state.requests.push({
+    id:'req_'+Date.now(),from:currentUser.username,type,details,
+    status:'pending',date:new Date().toISOString(),response:''
+  });
+  saveState();closeNewRequest();
+  document.getElementById('reqDetails').value='';
+  renderRequests();updateBadges();
+  alert('تم تقديم الطلب بنجاح');
+}
+
+function getReqTypeName(t){
+  const m={'leave':'طلب اجازة','promotion':'طلب ترقية','transfer':'طلب نقل','permission':'طلب صلاحية مؤقتة','clarification':'طلب توضيح اداري'};
+  return m[t]||t;
+}
+function getStatusName(s){
+  return{pending:'قيد الانتظار',approved:'مقبول',rejected:'مرفوض'}[s]||s;
+}
+
+// ============================================================
+// DOCUMENTS
+// ============================================================
+let currentDocTab = 'all';
+function renderDocuments(tab){
+  currentDocTab = tab;
+  const userLevel = RANK_LEVEL[currentUser.rank];
+  const isAdmin = isCommander(currentUser.rank) || canManageUsers(currentUser.rank);
+  document.getElementById('addDocBtn').style.display = isAdmin?'block':'none';
+  
+  let docs = state.documents.filter(d=>{
+    if(d.class==='secret' && !canSeeSecretDocs(currentUser.rank)) return false;
+    if(d.class==='internal' && !canSeeInternalDocs(currentUser.rank)) return false;
+    const minLevel = RANK_LEVEL[d.minRank]||0;
+    if(userLevel<minLevel) return false;
+    return tab==='all' || d.class===tab;
+  });
+  
+  const div = document.getElementById('docList');
+  if(docs.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد مستندات متاحة لرتبتك</div>';return;}
+  div.innerHTML = docs.map(d=>`
+    <div class="doc-card" onclick="viewDoc('${d.id}')">
+      <div class="doc-icon">[${d.class==='secret'?'S':d.class==='internal'?'I':'G'}]</div>
+      <div class="doc-info">
+        <div class="doc-title">${d.title}</div>
+        <div class="doc-meta">اضيف بواسطة: ${d.addedBy} - ${new Date(d.date).toLocaleDateString('ar')}</div>
+        <div class="doc-access ${d.class==='secret'?'glow-red':d.class==='internal'?'glow-amber':'glow-dim'}">[${d.class==='secret'?'سري':d.class==='internal'?'داخلي':'عام'}] - الوصول: ${d.minRank} فما فوق</div>
+      </div>
+    </div>`).join('');
+}
+
+function viewDoc(id){
+  const doc = state.documents.find(d=>d.id===id);
+  if(!doc)return;
+  doc.accessLog.push({user:currentUser.username,time:new Date().toISOString()});
+  saveState();
+  alert(`--- ${doc.title} ---\n\nالتصنيف: ${doc.class==='secret'?'سري':doc.class==='internal'?'داخلي':'عام'}\nالرتبة المطلوبة: ${doc.minRank} فما فوق\n\n${doc.content}`);
+}
+
+function switchDocTab(tab,el){
+  document.querySelectorAll('#panel-documents .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderDocuments(tab);
+}
+
+function openAddDoc(){document.getElementById('addDocForm').style.display='block';}
+function closeAddDoc(){document.getElementById('addDocForm').style.display='none';}
+function submitDoc(){
+  const title=document.getElementById('docTitle').value.trim();
+  const cl=document.getElementById('docClass').value;
+  const minRank=document.getElementById('docMinRank').value;
+  const content=document.getElementById('docContent').value.trim();
+  if(!title||!content){alert('يرجى ملء جميع الحقول');return;}
+  state.documents.push({
+    id:'doc_'+Date.now(),title,class:cl,content,minRank,
+    addedBy:currentUser.username,date:new Date().toISOString(),accessLog:[]
+  });
+  saveState();closeAddDoc();
+  document.getElementById('docTitle').value='';
+  document.getElementById('docContent').value='';
+  renderDocuments(currentDocTab);
+  alert('تم حفظ المستند بنجاح');
+}
+
+// ============================================================
+// VIOLATIONS
+// ============================================================
+function renderViolations(){
+  const canAdd = canAddViolation(currentUser.rank);
+  const canSeeAll = canManageUsers(currentUser.rank)||isCommander(currentUser.rank);
+  document.getElementById('addViolBtn').style.display = canAdd?'block':'none';
+  
+  if(canSeeAll){
+    document.getElementById('allViolList').style.display='block';
+    document.getElementById('myViolList').style.display='none';
+    renderAllViolations();
+  } else {
+    document.getElementById('myViolList').style.display='block';
+    renderMyViolations();
+  }
+}
+
+function renderMyViolations(){
+  const viols = state.violations.filter(v=>v.targetUser===currentUser.username);
+  const div = document.getElementById('myViolList');
+  if(viols.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد مخالفات مسجلة بحقك</div>';return;}
+  div.innerHTML = `<div class="alert alert-red" style="margin-bottom:16px">لديك ${viols.length} مخالفة مسجلة</div>` + viols.map(v=>renderViolCard(v)).join('');
+}
+
+function renderAllViolations(){
+  const div = document.getElementById('allViolList');
+  if(state.violations.length===0){div.innerHTML='<div style="color:#333;font-size:12px;padding:20px">لا توجد مخالفات مسجلة</div>';return;}
+  div.innerHTML = state.violations.slice().reverse().map(v=>renderViolCard(v,true)).join('');
+}
+
+function renderViolCard(v,showUser=false){
+  const sevColor = {high:'sev-high',med:'sev-med',low:'sev-low'}[v.severity]||'sev-low';
+  const sevLabel = {high:'عالية',med:'متوسطة',low:'منخفضة'}[v.severity]||'منخفضة';
+  return `<div class="violation-card">
+    <div class="violation-severity ${sevColor}">[!]</div>
+    <div style="flex:1">
+      ${showUser?`<div style="font-size:11px;color:var(--red);margin-bottom:4px">${v.targetUser}</div>`:''}
+      <div style="font-size:13px;color:var(--green-dim)">${v.type}</div>
+      <div style="font-size:11px;color:#555;margin-top:4px">${v.details}</div>
+      <div style="font-size:10px;color:#444;margin-top:6px">ابلغ: ${v.reportedBy} - ${new Date(v.date).toLocaleDateString('ar')} - الخطورة: <span class="${sevColor}">${sevLabel}</span></div>
+    </div>
+  </div>`;
+}
+
+function openAddViolation(){
+  populateSelects();
+  document.getElementById('addViolForm').style.display='block';
+}
+function closeAddViolation(){document.getElementById('addViolForm').style.display='none';}
+function submitViolation(){
+  const targetUser=document.getElementById('violUser').value;
+  const type=document.getElementById('violType').value;
+  const severity=document.getElementById('violSeverity').value;
+  const details=document.getElementById('violDetails').value.trim();
+  if(!details){alert('يرجى ادخال تفاصيل المخالفة');return;}
+  state.violations.push({
+    id:'viol_'+Date.now(),targetUser,type,severity,details,
+    reportedBy:currentUser.username,date:new Date().toISOString()
+  });
+  // Check accumulated violations
+  const userViols = state.violations.filter(v=>v.targetUser===targetUser);
+  const user = state.users.find(u=>u.username===targetUser);
+  if(user && userViols.filter(v=>v.severity==='high').length>=3){
+    alert(`تحذير: المستخدم ${targetUser} لديه 3 مخالفات عالية الخطورة. يُنصح باتخاذ اجراء.`);
+  }
+  saveState();closeAddViolation();
+  document.getElementById('violDetails').value='';
+  renderViolations();
+}
+
+// ============================================================
+// USERS (Admin)
+// ============================================================
+function renderUsers(){
+  // Online users grid
+  const online = state.users.filter(u=>u.isOnline);
+  document.getElementById('onlineUsersGrid').innerHTML = online.map(u=>`
+    <div class="user-chip">
+      <div class="status-dot dot-green"></div>
+      <span>${u.username}</span>
+      <span style="color:var(--green-dim);font-size:10px">${u.rank}</span>
+    </div>`).join('') + state.users.filter(u=>!u.isOnline).map(u=>`
+    <div class="user-chip" style="border-color:#1a1a1a">
+      <div class="status-dot dot-red"></div>
+      <span style="color:#444">${u.username}</span>
+      <span style="color:#333;font-size:10px">${u.rank}</span>
+    </div>`).join('');
+  
+  // Table
+  document.getElementById('usersTableBody').innerHTML = state.users.map(u=>`
+    <tr>
+      <td style="color:var(--green)">${u.username}</td>
+      <td><span class="rank-badge ${getRankClass(u.rank)}">${u.rank}</span></td>
+      <td><span class="status-dot ${u.isOnline?'dot-green':'dot-red'}"></span>${u.isActive?'نشط':'موقوف'}</td>
+      <td style="color:#444">${u.lastLogin?new Date(u.lastLogin).toLocaleDateString('ar'):'---'}</td>
+      <td>
+        ${isCommander(currentUser.rank)||canManageUsers(currentUser.rank)?`
+          ${u.isActive?`<button class="btn btn-xs btn-red" onclick="toggleUser('${u.id}',false)">تعطيل</button>`:`<button class="btn btn-xs glow" onclick="toggleUser('${u.id}',true)">تفعيل</button>`}
+          ${isCommander(currentUser.rank)&&u.username!==currentUser.username?`<button class="btn btn-xs btn-red" onclick="deleteUser('${u.id}')" style="margin-right:4px">حذف</button>`:''}
+        `:'---'}
+      </td>
+    </tr>`).join('');
+}
+
+function toggleUser(id,active){
+  const user = state.users.find(u=>u.id===id);
+  if(!user)return;
+  user.isActive=active;
+  if(!active) user.isOnline=false;
+  if(isCommander(currentUser.rank)){
+    state.commandLog.push({action:`${active?'تفعيل':'تعطيل'} حساب ${user.username}`,date:new Date().toISOString()});
+  }
+  saveState();renderUsers();
+}
+
+function deleteUser(id){
+  if(!isCommander(currentUser.rank))return;
+  if(!confirm('هل انت متاكد من حذف هذا الحساب؟'))return;
+  const user = state.users.find(u=>u.id===id);
+  state.commandLog.push({action:`حذف حساب ${user?.username}`,date:new Date().toISOString()});
+  state.users = state.users.filter(u=>u.id!==id);
+  saveState();renderUsers();
+}
+
+function getRankClass(rank){
+  if(rank==='القائد الاعلى') return 'rank-supreme';
+  if(RANK_LEVEL[rank]>=RANK_LEVEL['لواء']) return 'rank-high';
+  if(RANK_LEVEL[rank]>=RANK_LEVEL['ملازم']) return 'rank-mid';
+  return 'rank-low';
+}
+
+// ============================================================
+// COMMANDER PANEL
+// ============================================================
+function renderCommander(){
+  if(!isCommander(currentUser.rank)&&!canManageUsers(currentUser.rank))return;
+  populateSelects();
+  
+  // Command log
+  document.getElementById('commandLog').innerHTML = state.commandLog.slice().reverse().slice(0,20).map(l=>
+    `<div><span style="color:var(--red)">[${new Date(l.date).toLocaleString('ar')}]</span> ${l.action}</div>`
+  ).join('') || '<div style="color:#333">لا يوجد سجل قرارات</div>';
+  
+  // Pending requests
+  const pending = state.requests.filter(r=>r.status==='pending');
+  document.getElementById('pendingRequestsAdmin').innerHTML = pending.length===0?
+    '<div style="color:#333;font-size:12px">لا توجد طلبات معلقة</div>':
+    pending.map(r=>`
+      <div style="padding:10px;border:1px solid var(--border);margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="color:var(--green);font-size:12px">${r.from} - ${getReqTypeName(r.type)}</span>
+        </div>
+        <div style="font-size:11px;color:#555;margin-bottom:8px">${r.details}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-xs glow" onclick="processRequest('${r.id}','approved')">قبول</button>
+          <button class="btn btn-xs btn-red" onclick="processRequest('${r.id}','rejected')">رفض</button>
+        </div>
+      </div>`).join('');
+}
+
+function changeUserRank(){
+  const username = document.getElementById('rankChangeUser').value;
+  const rank = document.getElementById('rankChangeRank').value;
+  const user = state.users.find(u=>u.username===username);
+  if(!user)return;
+  const oldRank = user.rank;
+  user.rank = rank;
+  state.commandLog.push({action:`تغيير رتبة ${username} من ${oldRank} الى ${rank}`,date:new Date().toISOString()});
+  saveState();
+  alert(`تم تغيير رتبة ${username} الى ${rank}`);
+  renderCommander();
+}
+
+function forceLawsReapproval(){
+  if(!isCommander(currentUser.rank))return;
+  state.lawsVersion++;
+  state.users.forEach(u=>{if(u.username!==currentUser.username) u.lawsApproved=false;});
+  state.commandLog.push({action:'فرض اعادة الموافقة على القوانين',date:new Date().toISOString()});
+  saveState();alert('تم. سيُطلب من جميع الاعضاء الموافقة على القوانين عند تسجيل الدخول.');
+}
+
+function pauseSystem(fullStop){
+  if(!isCommander(currentUser.rank))return;
+  state.systemPaused=true;
+  state.commandLog.push({action:'ايقاف مؤقت للنظام',date:new Date().toISOString()});
+  saveState();
+  document.getElementById('sysMsg').textContent='تم ايقاف النظام مؤقتا بامر القائد الاعلى';
+  document.getElementById('systemOverlay').classList.add('active');
+  setTimeout(()=>{
+    document.getElementById('systemOverlay').classList.remove('active');
+    state.systemPaused=false;
+    saveState();
+  },5000);
+}
+
+function destroySystem(){
+  if(!isCommander(currentUser.rank))return;
+  state.commandLog.push({action:'تفعيل التدمير الذاتي',date:new Date().toISOString()});
+  // Clear all data except commander account
+  const cmdr = state.users.find(u=>u.username===currentUser.username);
+  state.users=[cmdr];state.messages=[];state.requests=[];
+  state.violations=[];state.documents=[];state.loginLogs=[];
+  saveState();
+  document.getElementById('sysMsg').textContent='تم ايقاف النظام باوامر القائد الاعلى';
+  document.getElementById('systemOverlay').classList.add('active');
+  setTimeout(()=>{
+    location.reload();
+  },5000);
+}
+
+// ============================================================
+// LAWS PANEL
+// ============================================================
+function renderLaws(){
+  document.getElementById('editLawsBtn').style.display = isCommander(currentUser.rank)?'block':'none';
+  document.getElementById('lawsContent').innerHTML = `
+    <div class="card">
+      <div class="card-label">القوانين الداخلية - INTERNAL LAWS</div>
+      <div style="margin-top:16px;font-size:12px;color:#777;line-height:2.5;white-space:pre-line">${state.laws}</div>
+    </div>`;
+}
+
+function openEditLaws(){
+  const newLaws = prompt('تعديل القوانين (النص الكامل):',state.laws);
+  if(newLaws!==null){
+    state.laws=newLaws;
+    state.commandLog.push({action:'تعديل القوانين الداخلية',date:new Date().toISOString()});
+    saveState();renderLaws();
+  }
+}
+
+// ============================================================
+// GPS / CESIUM MAP
+// ============================================================
+let mapInitialized = false;
+function initMap(){
+  if(mapInitialized) return;
+  mapInitialized = true;
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTA5MWQ2Zi0yZGNhLTRkZGQtOTZlZC0yYmQyZmI2YmY0ZDIiLCJpZCI6Mzk1ODgxLCJpYXQiOjE3NzIyOTU4NDV9.SxUybsg_BRZNatuEJZHAF_FucdSKkSawv_4sZ3gESJI';
+  try{
+    cesiumViewer = new Cesium.Viewer('cesiumContainer',{
+      terrainProvider: Cesium.createWorldTerrain(),
+      animation:false,timeline:false,
+      baseLayerPicker:false,geocoder:false,homeButton:false,
+      sceneModePicker:false,navigationHelpButton:false
+    });
+    // Apply dark/hologram style
+    cesiumViewer.scene.globe.baseColor = new Cesium.Color(0,0.05,0,1);
+    cesiumViewer.scene.backgroundColor = Cesium.Color.BLACK;
+    cesiumViewer.scene.skyBox.show = true;
+    cesiumViewer.scene.sun.show = false;
+    cesiumViewer.scene.moon.show = false;
+    
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const lng=pos.coords.longitude, lat=pos.coords.latitude;
+        cesiumViewer.entities.add({
+          position:Cesium.Cartesian3.fromDegrees(lng,lat),
+          point:{pixelSize:15,color:Cesium.Color.fromCssColorString('#00ff41'),outlineColor:Cesium.Color.BLACK,outlineWidth:2},
+          label:{text:'موقعي الحالي',font:'14px Share Tech Mono',fillColor:Cesium.Color.fromCssColorString('#00ff41'),backgroundColor:Cesium.Color.BLACK,showBackground:true,pixelOffset:new Cesium.Cartesian2(0,-30)}
+        });
+        cesiumViewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lng,lat,1000000)});
+      });
+    }
+  }catch(e){
+    document.getElementById('cesiumContainer').innerHTML=`<div style="color:var(--green-dim);padding:40px;text-align:center;font-size:12px">تعذر تحميل الخريطة ثلاثية الابعاد<br>يرجى التحقق من الاتصال</div>`;
+  }
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function showError(id,msg){
+  const el=document.getElementById(id);
+  if(el){el.style.display='block';el.textContent=msg;}
+}
+function escHtml(t){
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function startClock(){
+  const update=()=>{
+    document.getElementById('topbarTime').textContent = new Date().toLocaleTimeString('ar');
+  };
+  update();setInterval(update,1000);
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+function toggleLang(){
+  const html=document.documentElement;
+  if(html.lang==='ar'){html.lang='en';html.dir='ltr';}
+  else{html.lang='ar';html.dir='rtl';}
+}
+
+// Register with high rank option
+function openRegisterWithRank(){
+  if(!currentUser||!canCreateAccount(currentUser.rank))return;
+  showPanel('users');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+
+// Handle system paused on startup
+if(state.systemPaused){
+  // Only commander can proceed
+}
+</script>
+</body>
+</html>

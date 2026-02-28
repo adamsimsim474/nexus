@@ -581,6 +581,9 @@ select.form-input option{background:var(--bg);color:var(--green)}
         <div class="nav-item" onclick="showPanel('users')" id="nav-users">
           <span class="nav-icon" style="color:var(--red)">[U]</span> المستخدمون
         </div>
+        <div class="nav-item" onclick="showPanel('createaccount')" id="nav-createaccount">
+          <span class="nav-icon" style="color:var(--amber)">[+]</span> انشاء حساب
+        </div>
         <div class="nav-item" onclick="showPanel('commander')" id="nav-commander">
           <span class="nav-icon" style="color:var(--red)">[C]</span> لوحة القائد
         </div>
@@ -955,6 +958,41 @@ select.form-input option{background:var(--bg);color:var(--green)}
           <div id="pendingRequestsAdmin" style="margin-top:12px"></div>
         </div>
       </div>
+
+      <!-- Create Account Panel -->
+      <div class="panel" id="panel-createaccount">
+        <div class="panel-header">
+          <div class="panel-title glow">انشاء حساب جديد - CREATE ACCOUNT</div>
+        </div>
+        <div style="max-width:500px">
+          <div class="card">
+            <div class="card-label">بيانات الحساب الجديد</div>
+            <div style="margin-top:16px">
+              <div class="form-group">
+                <label class="form-label">اسم المستخدم</label>
+                <input type="text" class="form-input" id="newAccUser" placeholder="USERNAME" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-label">كلمة المرور</label>
+                <input type="password" class="form-input" id="newAccPass" placeholder="MIN 6 CHARACTERS">
+              </div>
+              <div class="form-group">
+                <label class="form-label">الرتبة</label>
+                <select class="form-input" id="newAccRank"></select>
+              </div>
+              <div id="newAccError" class="error-msg" style="display:none"></div>
+              <div id="newAccSuccess" class="success-msg" style="display:none"></div>
+              <div style="margin-top:20px">
+                <button class="btn glow" onclick="createAccountByOfficer()">انشاء الحساب</button>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-amber" style="margin-top:16px">
+            يمكن لرتبة لواء فما فوق انشاء حسابات جديدة بالاسم والرمز والرتبة التي يريدها.
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1015,9 +1053,41 @@ function getLaws(){
   `.trim();
 }
 
-// Init default data
-function initData(){
-  // Create default Commander account
+// initData محذوفة - البيانات تُحفظ وتُقرأ من localStorage بشكل صحيح
+
+function saveState(){
+  try{
+    localStorage.setItem('nexus_state', JSON.stringify(state));
+  }catch(e){
+    console.error('Save failed:',e);
+  }
+}
+
+function loadState(){
+  try{
+    const s = localStorage.getItem('nexus_state');
+    if(s){
+      const parsed = JSON.parse(s);
+      // استعادة كل البيانات المحفوظة بدون تغيير
+      state.users        = parsed.users        || [];
+      state.messages     = parsed.messages     || [];
+      state.requests     = parsed.requests     || [];
+      state.documents    = parsed.documents    || [];
+      state.violations   = parsed.violations   || [];
+      state.laws         = parsed.laws         || getLaws();
+      state.commandLog   = parsed.commandLog   || [];
+      state.systemPaused = parsed.systemPaused || false;
+      state.loginLogs    = parsed.loginLogs    || [];
+      state.lawsVersion  = parsed.lawsVersion  || 1;
+    }
+  }catch(e){
+    console.error('Load failed:',e);
+  }
+  // فقط إضافة حساب القائد إذا لم يكن موجوداً
+  ensureCommander();
+}
+
+function ensureCommander(){
   if(!state.users.find(u=>u.username==='the_leader')){
     state.users.push({
       id:'user_0',
@@ -1032,35 +1102,8 @@ function initData(){
       lawsVersion:1,
       violations:[]
     });
+    saveState();
   }
-  // Sample users
-  if(state.users.length<3){
-    state.users.push(
-      {id:'user_1',username:'general_ali',password:'123456',rank:'لواء',isActive:true,isOnline:false,createdAt:new Date().toISOString(),lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
-      {id:'user_2',username:'captain_omar',password:'123456',rank:'نقيب',isActive:true,isOnline:false,createdAt:new Date().toISOString(),lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]}
-    );
-    // Sample docs
-    state.documents.push(
-      {id:'doc_1',title:'دليل الانضباط العسكري',class:'general',content:'يتضمن هذا الدليل الارشادات الاساسية للانضباط والسلوك العسكري داخل المنظومة...',minRank:'جندي',addedBy:'the_leader',date:new Date().toISOString(),accessLog:[]},
-      {id:'doc_2',title:'تقرير العمليات الداخلية',class:'internal',content:'هذا التقرير مخصص للضباط ويحتوي على تفاصيل الخطط التنظيمية الداخلية...',minRank:'ملازم',addedBy:'the_leader',date:new Date().toISOString(),accessLog:[]},
-      {id:'doc_3',title:'بروتوكول الامن المعلوماتي',class:'secret',content:'بروتوكول سري للتعامل مع الحوادث الامنية وانتهاكات البيانات...',minRank:'عقيد',addedBy:'the_leader',date:new Date().toISOString(),accessLog:[]}
-    );
-    state.requests.push(
-      {id:'req_1',from:'captain_omar',type:'promotion',details:'اطلب الترقية الى رتبة رائد بناء على الخدمة المتميزة...',status:'pending',date:new Date().toISOString(),response:''}
-    );
-  }
-  saveState();
-}
-
-function saveState(){
-  try{localStorage.setItem('nexus_state',JSON.stringify(state))}catch(e){}
-}
-function loadState(){
-  try{
-    const s = localStorage.getItem('nexus_state');
-    if(s){state=JSON.parse(s)}
-  }catch(e){}
-  initData();
 }
 
 // ============================================================
@@ -1215,6 +1258,14 @@ function populateSelects(){
   // Register rank
   const rr = document.getElementById('regRank');
   if(rr) rr.innerHTML = RANKS.map(r=>`<option value="${r}">${r}</option>`).join('');
+  // New account rank (limited by creator rank)
+  const nar = document.getElementById('newAccRank');
+  if(nar){
+    const allowedRanks = isCommander(currentUser.rank)
+      ? RANKS
+      : RANKS.filter(r => RANK_LEVEL[r] < RANK_LEVEL[currentUser.rank]);
+    nar.innerHTML = allowedRanks.map(r=>`<option value="${r}">${r}</option>`).join('');
+  }
 }
 
 function updateBadges(){
@@ -1254,6 +1305,7 @@ function renderPanel(name){
     case 'commander': renderCommander();break;
     case 'laws': renderLaws();break;
     case 'map': initMap();break;
+    case 'createaccount': renderCreateAccount();break;
     case 'ai': /* stays as is */break;
   }
 }
@@ -1925,35 +1977,143 @@ let mapInitialized = false;
 function initMap(){
   if(mapInitialized) return;
   mapInitialized = true;
+
+  // اذا كانت مكتبة Cesium غير محملة
+  if(typeof Cesium === 'undefined'){
+    document.getElementById('cesiumContainer').innerHTML=`
+      <div style="color:var(--green-dim);padding:60px;text-align:center;font-size:13px;line-height:2.5">
+        <div style="font-size:24px;color:var(--red);margin-bottom:16px">[!]</div>
+        تعذر تحميل مكتبة الخريطة<br>
+        <span style="color:#444;font-size:11px">تاكد من اتصالك بالانترنت ثم اعد تحميل الصفحة</span>
+      </div>`;
+    return;
+  }
+
   Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTA5MWQ2Zi0yZGNhLTRkZGQtOTZlZC0yYmQyZmI2YmY0ZDIiLCJpZCI6Mzk1ODgxLCJpYXQiOjE3NzIyOTU4NDV9.SxUybsg_BRZNatuEJZHAF_FucdSKkSawv_4sZ3gESJI';
+
   try{
-    cesiumViewer = new Cesium.Viewer('cesiumContainer',{
-      terrainProvider: Cesium.createWorldTerrain(),
-      animation:false,timeline:false,
-      baseLayerPicker:false,geocoder:false,homeButton:false,
-      sceneModePicker:false,navigationHelpButton:false
-    });
-    // Apply dark/hologram style
-    cesiumViewer.scene.globe.baseColor = new Cesium.Color(0,0.05,0,1);
+    // تحديد نوع terrain provider حسب اصدار Cesium
+    let terrainProvider;
+    if(Cesium.createWorldTerrainAsync){
+      terrainProvider = undefined; // سيتم تحميله لاحقاً
+    } else if(Cesium.createWorldTerrain){
+      terrainProvider = Cesium.createWorldTerrain();
+    }
+
+    const viewerOptions = {
+      animation:false,
+      timeline:false,
+      baseLayerPicker:false,
+      geocoder:false,
+      homeButton:false,
+      sceneModePicker:false,
+      navigationHelpButton:false,
+      fullscreenButton:false,
+      infoBox:false,
+      selectionIndicator:false
+    };
+    if(terrainProvider) viewerOptions.terrainProvider = terrainProvider;
+
+    cesiumViewer = new Cesium.Viewer('cesiumContainer', viewerOptions);
+
+    // اذا كان الاصدار الجديد
+    if(Cesium.createWorldTerrainAsync){
+      Cesium.createWorldTerrainAsync().then(tp=>{
+        cesiumViewer.terrainProvider = tp;
+      }).catch(()=>{});
+    }
+
+    // تطبيق ستايل الهولوغرام الداكن
+    cesiumViewer.scene.globe.baseColor = new Cesium.Color(0, 0.04, 0.02, 1);
     cesiumViewer.scene.backgroundColor = Cesium.Color.BLACK;
-    cesiumViewer.scene.skyBox.show = true;
+    cesiumViewer.scene.skyBox.show = false;
     cesiumViewer.scene.sun.show = false;
     cesiumViewer.scene.moon.show = false;
-    
+    cesiumViewer.scene.skyAtmosphere.show = true;
+    cesiumViewer.scene.skyAtmosphere.atmosphereLightIntensity = 3.0;
+
+    // تلوين الكرة الارضية باللون الاخضر النيون
+    try{
+      const imageryLayer = cesiumViewer.imageryLayers.get(0);
+      if(imageryLayer){
+        imageryLayer.hue = 0.35;
+        imageryLayer.saturation = 0.1;
+        imageryLayer.brightness = 0.3;
+      }
+    }catch(e){}
+
+    // اضافة موقع المستخدم
     if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(pos=>{
-        const lng=pos.coords.longitude, lat=pos.coords.latitude;
-        cesiumViewer.entities.add({
-          position:Cesium.Cartesian3.fromDegrees(lng,lat),
-          point:{pixelSize:15,color:Cesium.Color.fromCssColorString('#00ff41'),outlineColor:Cesium.Color.BLACK,outlineWidth:2},
-          label:{text:'موقعي الحالي',font:'14px Share Tech Mono',fillColor:Cesium.Color.fromCssColorString('#00ff41'),backgroundColor:Cesium.Color.BLACK,showBackground:true,pixelOffset:new Cesium.Cartesian2(0,-30)}
-        });
-        cesiumViewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lng,lat,1000000)});
+      navigator.geolocation.getCurrentPosition(
+        pos=>{
+          const lng = pos.coords.longitude;
+          const lat = pos.coords.latitude;
+          cesiumViewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(lng, lat),
+            point:{
+              pixelSize: 14,
+              color: Cesium.Color.fromCssColorString('#00ff41'),
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+            },
+            label:{
+              text: currentUser ? currentUser.username + '\n' + currentUser.rank : 'موقعي',
+              font: '13px Share Tech Mono, monospace',
+              fillColor: Cesium.Color.fromCssColorString('#00ff41'),
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              backgroundColor: new Cesium.Color(0,0,0,0.7),
+              showBackground: true,
+              pixelOffset: new Cesium.Cartesian2(0, -36),
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+            }
+          });
+          cesiumViewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(lng, lat, 1500000),
+            duration: 2
+          });
+        },
+        err=>{
+          // اذا رفض المستخدم الموقع، اعرض الكرة الارضية كاملة
+          cesiumViewer.camera.flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(0, 20, 20000000),
+            duration: 2
+          });
+        }
+      );
+    } else {
+      cesiumViewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(0, 20, 20000000),
+        duration: 2
       });
     }
+
   }catch(e){
-    document.getElementById('cesiumContainer').innerHTML=`<div style="color:var(--green-dim);padding:40px;text-align:center;font-size:12px">تعذر تحميل الخريطة ثلاثية الابعاد<br>يرجى التحقق من الاتصال</div>`;
+    console.error('Cesium error:', e);
+    document.getElementById('cesiumContainer').innerHTML=`
+      <div style="color:var(--green-dim);padding:60px;text-align:center;font-size:13px;line-height:2.5">
+        <div style="font-size:24px;color:var(--red);margin-bottom:16px">[!]</div>
+        تعذر تهيئة الخريطة ثلاثية الابعاد<br>
+        <span style="color:#444;font-size:11px">${e.message||'خطا غير معروف'}</span><br>
+        <button class="btn btn-sm" style="margin-top:16px" onclick="mapInitialized=false;initMap()">اعادة المحاولة</button>
+      </div>`;
   }
+}
+
+function renderCreateAccount(){
+  if(!canCreateAccount(currentUser.rank)){
+    document.getElementById('panel-createaccount').innerHTML=`
+      <div class="alert alert-red">ليس لديك صلاحية الوصول لهذه الصفحة</div>`;
+    return;
+  }
+  populateSelects();
+  // Clear previous messages
+  const errEl = document.getElementById('newAccError');
+  const sucEl = document.getElementById('newAccSuccess');
+  if(errEl) errEl.style.display='none';
+  if(sucEl) sucEl.style.display='none';
 }
 
 // ============================================================
@@ -1982,7 +2142,68 @@ function toggleLang(){
 // Register with high rank option
 function openRegisterWithRank(){
   if(!currentUser||!canCreateAccount(currentUser.rank))return;
-  showPanel('users');
+  showPanel('createaccount');
+}
+
+function createAccountByOfficer(){
+  if(!canCreateAccount(currentUser.rank)){
+    document.getElementById('newAccError').style.display='block';
+    document.getElementById('newAccError').textContent='ليس لديك صلاحية انشاء حسابات';
+    return;
+  }
+  const u = document.getElementById('newAccUser').value.trim();
+  const p = document.getElementById('newAccPass').value;
+  const rank = document.getElementById('newAccRank').value;
+
+  document.getElementById('newAccError').style.display='none';
+  document.getElementById('newAccSuccess').style.display='none';
+
+  if(!u||u.length<3){
+    document.getElementById('newAccError').style.display='block';
+    document.getElementById('newAccError').textContent='اسم المستخدم يجب ان يكون 3 احرف على الاقل';
+    return;
+  }
+  if(!p||p.length<6){
+    document.getElementById('newAccError').style.display='block';
+    document.getElementById('newAccError').textContent='كلمة المرور يجب ان تكون 6 احرف على الاقل';
+    return;
+  }
+  if(state.users.find(x=>x.username===u)){
+    document.getElementById('newAccError').style.display='block';
+    document.getElementById('newAccError').textContent='اسم المستخدم موجود مسبقا';
+    return;
+  }
+  // لواء لا يستطيع انشاء حساب بنفس رتبته او اعلى منه
+  if(!isCommander(currentUser.rank) && RANK_LEVEL[rank] >= RANK_LEVEL[currentUser.rank]){
+    document.getElementById('newAccError').style.display='block';
+    document.getElementById('newAccError').textContent='لا يمكنك انشاء حساب برتبة مساوية او اعلى من رتبتك';
+    return;
+  }
+
+  const newUser = {
+    id: 'user_'+Date.now(),
+    username: u,
+    password: p,
+    rank: rank,
+    isActive: true,
+    isOnline: false,
+    createdAt: new Date().toISOString(),
+    lastLogin: null,
+    lawsApproved: false,
+    lawsVersion: 0,
+    violations: []
+  };
+  state.users.push(newUser);
+  if(isCommander(currentUser.rank)){
+    state.commandLog.push({action:`انشاء حساب جديد: ${u} - ${rank}`, date:new Date().toISOString()});
+  }
+  saveState();
+
+  document.getElementById('newAccSuccess').style.display='block';
+  document.getElementById('newAccSuccess').textContent=`تم انشاء حساب "${u}" برتبة "${rank}" بنجاح`;
+  document.getElementById('newAccUser').value='';
+  document.getElementById('newAccPass').value='';
+  populateSelects();
 }
 
 // ============================================================

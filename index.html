@@ -1,427 +1,256 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXUS COMMAND - النظام القيادي</title>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --green:#00ff41;--green-dim:#00aa28;--green-glow:rgba(0,255,65,0.4);
-  --red:#ff0033;--amber:#ffaa00;--bg:#000000;--bg2:#050505;
-  --border:#1a2a1a;--panel:#070f07;
-  --font-mono:'Share Tech Mono',monospace;--font-vt:'VT323',monospace;
-}
-html,body{height:100%;overflow:hidden;background:var(--bg)}
-body{font-family:var(--font-mono);color:var(--green)}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:9999}
-body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:9998}
-.glow{text-shadow:0 0 8px var(--green),0 0 16px var(--green-glow)}
-.glow-red{text-shadow:0 0 8px var(--red)}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#050505}::-webkit-scrollbar-thumb{background:var(--green-dim)}
-#loadingScreen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-.load-title{font-family:var(--font-vt);font-size:36px;color:var(--green);letter-spacing:8px}
-.load-bar{width:300px;height:2px;background:#111}
-.load-fill{height:100%;background:var(--green);animation:ld 2s ease-in-out infinite}
-@keyframes ld{0%{width:0}100%{width:100%}}
-.load-txt{font-size:10px;color:#333;letter-spacing:3px}
-#loginScreen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--bg);z-index:100}
-.login-box{border:1px solid var(--green-dim);background:var(--panel);padding:44px;width:90%;max-width:430px;position:relative}
-.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
-.login-title{font-family:var(--font-vt);font-size:26px;text-align:center;letter-spacing:6px;margin-bottom:5px}
-.login-sub{font-size:10px;text-align:center;color:var(--green-dim);margin-bottom:30px;letter-spacing:3px}
-.fg{margin-bottom:16px}
-.fl{display:block;font-size:10px;color:var(--green-dim);margin-bottom:5px;letter-spacing:2px}
-.fi{width:100%;background:rgba(0,255,65,0.03);border:1px solid var(--green-dim);color:var(--green);font-family:var(--font-mono);font-size:13px;padding:9px 11px;outline:none}
-.fi:focus{border-color:var(--green)}
-select.fi option{background:var(--bg)}
-textarea.fi{height:80px;resize:vertical}
-.btn{width:100%;background:transparent;border:1px solid var(--green);color:var(--green);font-family:var(--font-mono);font-size:12px;padding:10px;cursor:pointer;letter-spacing:3px;transition:all 0.2s;text-transform:uppercase}
-.btn:hover{background:rgba(0,255,65,0.1)}
-.btn:active{transform:scale(0.98)}
-.btn-r{border-color:var(--red);color:var(--red)}.btn-r:hover{background:rgba(255,0,51,0.1)}
-.btn-a{border-color:var(--amber);color:var(--amber)}
-.btn-sm{width:auto;padding:5px 14px;font-size:11px;letter-spacing:1px}
-.btn-xs{width:auto;padding:3px 9px;font-size:10px;letter-spacing:1px}
-.err{color:var(--red);font-size:11px;margin-top:7px;text-align:center}
-.suc{color:var(--green);font-size:11px;margin-top:7px;text-align:center}
-#lawsModal{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:200;display:none;align-items:center;justify-content:center}
-.laws-box{border:1px solid var(--green-dim);background:var(--panel);width:90%;max-width:660px;max-height:80vh;display:flex;flex-direction:column}
-.laws-hdr{padding:16px 20px;border-bottom:1px solid var(--border);font-family:var(--font-vt);font-size:20px;letter-spacing:4px}
-.laws-body{flex:1;overflow-y:auto;padding:20px;font-size:12px;line-height:2;color:#888}
-.laws-body h3{color:var(--green);font-size:12px;margin:12px 0 5px;letter-spacing:2px}
-.laws-ftr{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:9px;align-items:center}
-#app{display:none;height:100vh;flex-direction:column}
-#app.active{display:flex}
-.topbar{height:42px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0}
-.tb-logo{font-family:var(--font-vt);font-size:20px;letter-spacing:4px}
-.tb-div{width:1px;height:22px;background:var(--border)}
-.tb-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
-.tb-user{font-size:11px;color:var(--green-dim)}.tb-rank{font-size:11px;color:var(--amber)}
-.tb-time{margin-right:auto;font-size:11px;color:#333}
-.sync-ind{font-size:9px;letter-spacing:2px;padding:3px 7px;border:1px solid}
-.s-ok{border-color:rgba(0,255,65,0.3);color:var(--green-dim)}
-.s-busy{border-color:rgba(255,170,0,0.3);color:var(--amber)}
-.s-err{border-color:rgba(255,0,51,0.3);color:var(--red)}
-.tb-btn{background:transparent;border:1px solid var(--border);color:#444;font-family:var(--font-mono);font-size:10px;padding:4px 9px;cursor:pointer;transition:all 0.2s}
-.tb-btn:hover{border-color:var(--green-dim);color:var(--green)}
-.main-layout{display:flex;flex:1;overflow:hidden}
-.sidebar{width:192px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto}
-.sb-sec{padding:13px 0}
-.sb-lbl{font-size:9px;color:#333;letter-spacing:3px;padding:0 13px 5px;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:9px;padding:8px 13px;cursor:pointer;font-size:11px;color:#444;letter-spacing:1px;transition:all 0.15s;border-right:2px solid transparent}
-.nav-item:hover{color:var(--green-dim);background:rgba(0,255,65,0.03)}
-.nav-item.active{color:var(--green);border-right-color:var(--green);background:rgba(0,255,65,0.05)}
-.nav-icon{width:13px;font-size:10px;text-align:center;opacity:0.7}
-.nav-badge{margin-right:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 5px}
-.content{flex:1;overflow-y:auto;background:var(--bg)}
-.panel{display:none;padding:20px;min-height:100%}
-.panel.active{display:block}
-.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:13px;border-bottom:1px solid var(--border)}
-.pt{font-family:var(--font-vt);font-size:21px;letter-spacing:3px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
-.card{background:var(--panel);border:1px solid var(--border);padding:13px;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green-dim),transparent)}
-.card-lbl{font-size:9px;color:#333;letter-spacing:3px;text-transform:uppercase;margin-bottom:7px}
-.sc{background:var(--panel);border:1px solid var(--border);padding:16px}
-.sn{font-family:var(--font-vt);font-size:46px;color:var(--green);line-height:1}
-.sl{font-size:9px;color:#333;letter-spacing:3px;margin-top:5px;text-transform:uppercase}
-.tbl{width:100%;border-collapse:collapse;font-size:11px}
-.tbl th{text-align:right;padding:8px 11px;font-size:9px;letter-spacing:3px;color:var(--green-dim);border-bottom:1px solid var(--border);text-transform:uppercase}
-.tbl td{padding:8px 11px;border-bottom:1px solid rgba(26,42,26,0.4);color:#555;transition:color 0.2s}
-.tbl tr:hover td{color:var(--green-dim)}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:4px}
-.dg{background:var(--green);box-shadow:0 0 5px var(--green)}
-.dr{background:var(--red);box-shadow:0 0 5px var(--red)}
-.da{background:var(--amber);box-shadow:0 0 5px var(--amber)}
-.rk{display:inline-block;padding:2px 7px;border:1px solid;font-size:10px}
-.rk-s{border-color:var(--red);color:var(--red)}.rk-h{border-color:var(--amber);color:var(--amber)}
-.rk-m{border-color:var(--green);color:var(--green)}.rk-l{border-color:#333;color:#444}
-.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
-.tab{padding:7px 16px;font-size:10px;letter-spacing:2px;cursor:pointer;color:#333;border-bottom:2px solid transparent;transition:all 0.2s;text-transform:uppercase}
-.tab:hover{color:var(--green-dim)}.tab.active{color:var(--green);border-bottom-color:var(--green)}
-.mi{padding:10px 13px;background:var(--panel);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:9px;margin-bottom:1px}
-.mi:hover{border-color:var(--green-dim)}.mi.unread{border-right:3px solid var(--green)}
-.chat-win{display:flex;flex-direction:column;height:calc(100vh - 210px);background:var(--panel);border:1px solid var(--border)}
-.chat-hdr{padding:10px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
-.chat-msgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:7px}
-.bubble{max-width:70%;padding:9px 12px;border:1px solid var(--border);font-size:11px;line-height:1.6}
-.bubble.mine{background:rgba(0,255,65,0.05);border-color:var(--green-dim);align-self:flex-end}
-.bubble.theirs{background:rgba(255,255,255,0.02);align-self:flex-start}
-.bfrom{font-size:9px;color:var(--green-dim);margin-bottom:2px;letter-spacing:1px}
-.btime{font-size:9px;color:#222;margin-top:2px}
-.ci-row{padding:10px 13px;border-top:1px solid var(--border);display:flex;gap:7px}
-.ci{flex:1;background:transparent;border:1px solid var(--border);color:var(--green);font-family:var(--font-mono);font-size:12px;padding:7px 10px;outline:none}
-.ci:focus{border-color:var(--green-dim)}
-.ai-wrap{display:flex;flex-direction:column;height:calc(100vh - 168px)}
-.ai-msgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:9px;background:var(--panel);border:1px solid var(--border)}
-.ai-msg{padding:10px 13px;border-right:3px solid;font-size:12px;line-height:1.8;max-width:85%}
-.ai-msg.user{border-color:var(--green-dim);background:rgba(0,255,65,0.03);align-self:flex-end}
-.ai-msg.assistant{border-color:var(--amber);background:rgba(255,170,0,0.03);color:#888;align-self:flex-start}
-.ai-tag{font-size:9px;margin-bottom:4px;letter-spacing:2px}
-.ai-msg.user .ai-tag{color:var(--green-dim)}.ai-msg.assistant .ai-tag{color:var(--amber)}
-.ai-ir{padding:9px 0 0;display:flex;gap:7px}
-.alert{padding:10px 13px;border:1px solid;font-size:11px;margin-bottom:9px}
-.al-r{border-color:rgba(255,0,51,0.4);color:var(--red);background:rgba(255,0,51,0.05)}
-.al-g{border-color:rgba(0,255,65,0.3);color:var(--green-dim);background:rgba(0,255,65,0.03)}
-.al-a{border-color:rgba(255,170,0,0.4);color:var(--amber);background:rgba(255,170,0,0.05)}
-.rc{background:var(--panel);border:1px solid var(--border);padding:13px;margin-bottom:7px;position:relative}
-.rc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px}
-.rc.pending::before{background:var(--amber)}.rc.approved::before{background:var(--green)}.rc.rejected::before{background:var(--red)}
-.dc{background:var(--panel);border:1px solid var(--border);padding:13px;display:flex;gap:11px;margin-bottom:6px;cursor:pointer;transition:all 0.2s}
-.dc:hover{border-color:var(--green-dim)}
-.vc{background:rgba(255,0,51,0.04);border:1px solid rgba(255,0,51,0.2);padding:12px 13px;margin-bottom:6px;display:flex;gap:12px}
-.prog{height:3px;background:var(--border);margin-top:5px}
-.pf{height:100%;background:var(--green)}
-.mc{display:flex;align-items:flex-end;gap:3px;height:48px}
-.mb{flex:1;background:rgba(0,255,65,0.12);border:1px solid rgba(0,255,65,0.22);min-width:5px}
-.cmd-p{background:linear-gradient(135deg,rgba(255,0,51,0.05),transparent);border:1px solid rgba(255,0,51,0.3);padding:16px;margin-bottom:13px}
-#sysOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:9000;display:none;align-items:center;justify-content:center}
-#sysOverlay.active{display:flex}
-.sys-msg{text-align:center;font-family:var(--font-vt);font-size:30px;color:var(--red);letter-spacing:6px;text-shadow:0 0 20px var(--red)}
-@keyframes sc{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
-.scanline{position:fixed;top:0;left:0;width:100%;height:40px;background:linear-gradient(transparent,rgba(0,255,65,0.03),transparent);animation:sc 8s linear infinite;pointer-events:none;z-index:9997}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.cursor::after{content:'_';animation:blink 1s infinite}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);font-size:10px}
-.fr{display:flex;gap:9px;margin-bottom:11px}
-.fr .fg{flex:1;margin-bottom:0}
+<!DOCTYPE html> <html lang="ar" dir="rtl"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>NEXUS COMMAND - النظام القيادي</title> <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet"> <style> *{margin:0;padding:0;box-sizing:border-box} :root{ --green:#00ff41;--green-dim:#00aa28;--green-glow:rgba(0,255,65,0.4); --red:#ff0033;--amber:#ffaa00;--bg:#000000;--bg2:#050505; --border:#1a2a1a;--panel:#070f07; --font-mono:'Share Tech Mono',monospace;--font-vt:'VT323',monospace; } html,body{height:100%;overflow:hidden;background:var(--bg)} body{font-family:var(--font-mono);color:var(--green)} body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:9999} body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:9998} .glow{text-shadow:0 0 8px var(--green),0 0 16px var(--green-glow)} .glow-red{text-shadow:0 0 8px var(--red)} ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#050505}::-webkit-scrollbar-thumb{background:var(--green-dim)} #loadingScreen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px} .load-title{font-family:var(--font-vt);font-size:36px;color:var(--green);letter-spacing:8px} .load-bar{width:300px;height:2px;background:#111} .load-fill{height:100%;background:var(--green);animation:ld 2s ease-in-out infinite} @keyframes ld{0%{width:0}100%{width:100%}} .load-txt{font-size:10px;color:#333;letter-spacing:3px} #loginScreen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--bg);z-index:100} .login-box{border:1px solid var(--green-dim);background:var(--panel);padding:44px;width:90%;max-width:430px;position:relative} .login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)} .login-title{font-family:var(--font-vt);font-size:26px;text-align:center;letter-spacing:6px;margin-bottom:5px} .login-sub{font-size:10px;text-align:center;color:var(--green-dim);margin-bottom:30px;letter-spacing:3px} .fg{margin-bottom:16px} .fl{display:block;font-size:10px;color:var(--green-dim);margin-bottom:5px;letter-spacing:2px} .fi{width:100%;background:rgba(0,255,65,0.03);border:1px solid var(--green-dim);color:var(--green);font-family:var(--font-mono);font-size:13px;padding:9px 11px;outline:none} .fi:focus{border-color:var(--green)} select.fi option{background:var(--bg)} textarea.fi{height:80px;resize:vertical} .btn{width:100%;background:transparent;border:1px solid var(--green);color:var(--green);font-family:var(--font-mono);font-size:12px;padding:10px;cursor:pointer;letter-spacing:3px;transition:all 0.2s;text-transform:uppercase} .btn:hover{background:rgba(0,255,65,0.1)} .btn:active{transform:scale(0.98)} .btn-r{border-color:var(--red);color:var(--red)}.btn-r:hover{background:rgba(255,0,51,0.1)} .btn-a{border-color:var(--amber);color:var(--amber)} .btn-sm{width:auto;padding:5px 14px;font-size:11px;letter-spacing:1px} .btn-xs{width:auto;padding:3px 9px;font-size:10px;letter-spacing:1px} .err{color:var(--red);font-size:11px;margin-top:7px;text-align:center} .suc{color:var(--green);font-size:11px;margin-top:7px;text-align:center} #lawsModal{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:200;display:none;align-items:center;justify-content:center} .laws-box{border:1px solid var(--green-dim);background:var(--panel);width:90%;max-width:660px;max-height:80vh;display:flex;flex-direction:column} .laws-hdr{padding:16px 20px;border-bottom:1px solid var(--border);font-family:var(--font-vt);font-size:20px;letter-spacing:4px} .laws-body{flex:1;overflow-y:auto;padding:20px;font-size:12px;line-height:2;color:#888} .laws-body h3{color:var(--green);font-size:12px;margin:12px 0 5px;letter-spacing:2px} .laws-ftr{padding:13px 20px;border-top:1px solid var(--border);display:flex;gap:9px;align-items:center} #app{display:none;height:100vh;flex-direction:column} #app.active{display:flex} .topbar{height:42px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0} .tb-logo{font-family:var(--font-vt);font-size:20px;letter-spacing:4px} .tb-div{width:1px;height:22px;background:var(--border)} .tb-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)} .tb-user{font-size:11px;color:var(--green-dim)}.tb-rank{font-size:11px;color:var(--amber)} .tb-time{margin-right:auto;font-size:11px;color:#333} .sync-ind{font-size:9px;letter-spacing:2px;padding:3px 7px;border:1px solid} .s-ok{border-color:rgba(0,255,65,0.3);color:var(--green-dim)} .s-busy{border-color:rgba(255,170,0,0.3);color:var(--amber)} .s-err{border-color:rgba(255,0,51,0.3);color:var(--red)} .tb-btn{background:transparent;border:1px solid var(--border);color:#444;font-family:var(--font-mono);font-size:10px;padding:4px 9px;cursor:pointer;transition:all 0.2s} .tb-btn:hover{border-color:var(--green-dim);color:var(--green)} .main-layout{display:flex;flex:1;overflow:hidden} .sidebar{width:192px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto} .sb-sec{padding:13px 0} .sb-lbl{font-size:9px;color:#333;letter-spacing:3px;padding:0 13px 5px;text-transform:uppercase} .nav-item{display:flex;align-items:center;gap:9px;padding:8px 13px;cursor:pointer;font-size:11px;color:#444;letter-spacing:1px;transition:all 0.15s;border-right:2px solid transparent} .nav-item:hover{color:var(--green-dim);background:rgba(0,255,65,0.03)} .nav-item.active{color:var(--green);border-right-color:var(--green);background:rgba(0,255,65,0.05)} .nav-icon{width:13px;font-size:10px;text-align:center;opacity:0.7} .nav-badge{margin-right:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 5px} .content{flex:1;overflow-y:auto;background:var(--bg)} .panel{display:none;padding:20px;min-height:100%} .panel.active{display:block} .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:13px;border-bottom:1px solid var(--border)} .pt{font-family:var(--font-vt);font-size:21px;letter-spacing:3px} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px} .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px} .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px} .card{background:var(--panel);border:1px solid var(--border);padding:13px;position:relative;overflow:hidden} .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green-dim),transparent)} .card-lbl{font-size:9px;color:#333;letter-spacing:3px;text-transform:uppercase;margin-bottom:7px} .sc{background:var(--panel);border:1px solid var(--border);padding:16px} .sn{font-family:var(--font-vt);font-size:46px;color:var(--green);line-height:1} .sl{font-size:9px;color:#333;letter-spacing:3px;margin-top:5px;text-transform:uppercase} .tbl{width:100%;border-collapse:collapse;font-size:11px} .tbl th{text-align:right;padding:8px 11px;font-size:9px;letter-spacing:3px;color:var(--green-dim);border-bottom:1px solid var(--border);text-transform:uppercase} .tbl td{padding:8px 11px;border-bottom:1px solid rgba(26,42,26,0.4);color:#555;transition:color 0.2s} .tbl tr:hover td{color:var(--green-dim)} .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:4px} .dg{background:var(--green);box-shadow:0 0 5px var(--green)} .dr{background:var(--red);box-shadow:0 0 5px var(--red)} .da{background:var(--amber);box-shadow:0 0 5px var(--amber)} .rk{display:inline-block;padding:2px 7px;border:1px solid;font-size:10px} .rk-s{border-color:var(--red);color:var(--red)}.rk-h{border-color:var(--amber);color:var(--amber)} .rk-m{border-color:var(--green);color:var(--green)}.rk-l{border-color:#333;color:#444} .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px} .tab{padding:7px 16px;font-size:10px;letter-spacing:2px;cursor:pointer;color:#333;border-bottom:2px solid transparent;transition:all 0.2s;text-transform:uppercase} .tab:hover{color:var(--green-dim)}.tab.active{color:var(--green);border-bottom-color:var(--green)} .mi{padding:10px 13px;background:var(--panel);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:9px;margin-bottom:1px} .mi:hover{border-color:var(--green-dim)}.mi.unread{border-right:3px solid var(--green)} .chat-win{display:flex;flex-direction:column;height:calc(100vh - 210px);background:var(--panel);border:1px solid var(--border)} .chat-hdr{padding:10px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px} .chat-msgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:7px} .bubble{max-width:70%;padding:9px 12px;border:1px solid var(--border);font-size:11px;line-height:1.6} .bubble.mine{background:rgba(0,255,65,0.05);border-color:var(--green-dim);align-self:flex-end} .bubble.theirs{background:rgba(255,255,255,0.02);align-self:flex-start} .bfrom{font-size:9px;color:var(--green-dim);margin-bottom:2px;letter-spacing:1px} .btime{font-size:9px;color:#222;margin-top:2px} .ci-row{padding:10px 13px;border-top:1px solid var(--border);display:flex;gap:7px} .ci{flex:1;background:transparent;border:1px solid var(--border);color:var(--green);font-family:var(--font-mono);font-size:12px;padding:7px 10px;outline:none} .ci:focus{border-color:var(--green-dim)} .ai-wrap{display:flex;flex-direction:column;height:calc(100vh - 168px)} .ai-msgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:9px;background:var(--panel);border:1px solid var(--border)} .ai-msg{padding:10px 13px;border-right:3px solid;font-size:12px;line-height:1.8;max-width:85%} .ai-msg.user{border-color:var(--green-dim);background:rgba(0,255,65,0.03);align-self:flex-end} .ai-msg.assistant{border-color:var(--amber);background:rgba(255,170,0,0.03);color:#888;align-self:flex-start} .ai-tag{font-size:9px;margin-bottom:4px;letter-spacing:2px} .ai-msg.user .ai-tag{color:var(--green-dim)}.ai-msg.assistant .ai-tag{color:var(--amber)} .ai-ir{padding:9px 0 0;display:flex;gap:7px} .alert{padding:10px 13px;border:1px solid;font-size:11px;margin-bottom:9px} .al-r{border-color:rgba(255,0,51,0.4);color:var(--red);background:rgba(255,0,51,0.05)} .al-g{border-color:rgba(0,255,65,0.3);color:var(--green-dim);background:rgba(0,255,65,0.03)} .al-a{border-color:rgba(255,170,0,0.4);color:var(--amber);background:rgba(255,170,0,0.05)} .rc{background:var(--panel);border:1px solid var(--border);padding:13px;margin-bottom:7px;position:relative} .rc::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px} .rc.pending::before{background:var(--amber)}.rc.approved::before{background:var(--green)}.rc.rejected::before{background:var(--red)} .dc{background:var(--panel);border:1px solid var(--border);padding:13px;display:flex;gap:11px;margin-bottom:6px;cursor:pointer;transition:all 0.2s} .dc:hover{border-color:var(--green-dim)} .vc{background:rgba(255,0,51,0.04);border:1px solid rgba(255,0,51,0.2);padding:12px 13px;margin-bottom:6px;display:flex;gap:12px} .prog{height:3px;background:var(--border);margin-top:5px} .pf{height:100%;background:var(--green)} .mc{display:flex;align-items:flex-end;gap:3px;height:48px} .mb{flex:1;background:rgba(0,255,65,0.12);border:1px solid rgba(0,255,65,0.22);min-width:5px} .cmd-p{background:linear-gradient(135deg,rgba(255,0,51,0.05),transparent);border:1px solid rgba(255,0,51,0.3);padding:16px;margin-bottom:13px} #sysOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:9000;display:none;align-items:center;justify-content:center} #sysOverlay.active{display:flex} .sys-msg{text-align:center;font-family:var(--font-vt);font-size:30px;color:var(--red);letter-spacing:6px;text-shadow:0 0 20px var(--red)} @keyframes sc{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}} .scanline{position:fixed;top:0;left:0;width:100%;height:40px;background:linear-gradient(transparent,rgba(0,255,65,0.03),transparent);animation:sc 8s linear infinite;pointer-events:none;z-index:9997} @keyframes blink{0%,100%{opacity:1}50%{opacity:0}} .cursor::after{content:'_';animation:blink 1s infinite} .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px} .chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--border);font-size:10px} .fr{display:flex;gap:9px;margin-bottom:11px} .fr .fg{flex:1;margin-bottom:0} #cesiumContainer{width:100%;height:calc(100vh - 180px)}
+
+/* ============ GLOBAL MONITOR STYLES ============ */
+#panel-globalmonitor{padding:0;overflow:hidden}
+.gm-layout{display:grid;grid-template-columns:320px 1fr 280px;height:calc(100vh - 42px);overflow:hidden}
+.gm-left{background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.gm-center{position:relative;overflow:hidden;background:#000}
+.gm-right{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.gm-sec{border-bottom:1px solid var(--border);padding:10px 12px}
+.gm-sec-title{font-size:9px;color:#333;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.gm-sec-title .live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse-red 1.5s infinite}
+@keyframes pulse-red{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,0,51,0.4)}50%{opacity:0.7;box-shadow:0 0 0 4px rgba(255,0,51,0)}}
+.news-item{padding:8px 0;border-bottom:1px solid rgba(26,42,26,0.3);cursor:pointer;transition:all 0.2s}
+.news-item:last-child{border-bottom:none}
+.news-item:hover .news-title{color:var(--green)}
+.news-cat{font-size:8px;letter-spacing:2px;padding:2px 5px;border:1px solid;display:inline-block;margin-bottom:4px}
+.cat-war{border-color:rgba(255,0,51,0.5);color:var(--red)}
+.cat-diplo{border-color:rgba(255,170,0,0.5);color:var(--amber)}
+.cat-missile{border-color:rgba(255,0,51,0.7);color:var(--red);animation:blink-border 2s infinite}
+@keyframes blink-border{0%,100%{border-color:rgba(255,0,51,0.7)}50%{border-color:rgba(255,0,51,0.2)}}
+.cat-intel{border-color:rgba(0,255,65,0.4);color:var(--green-dim)}
+.cat-nuclear{border-color:rgba(255,0,51,1);color:var(--red);background:rgba(255,0,51,0.1)}
+.news-title{font-size:11px;color:#666;line-height:1.5;transition:color 0.2s}
+.news-meta{font-size:9px;color:#222;margin-top:3px;display:flex;gap:8px}
+.news-time{color:#1a3a1a}
+.news-source{color:#2a2a2a}
+.ticker-wrap{position:absolute;bottom:0;left:0;right:0;height:32px;background:rgba(0,0,0,0.9);border-top:1px solid rgba(255,0,51,0.3);display:flex;align-items:center;overflow:hidden;z-index:10}
+.ticker-label{background:var(--red);color:#fff;font-size:10px;letter-spacing:2px;padding:0 10px;height:100%;display:flex;align-items:center;flex-shrink:0;z-index:1}
+.ticker-track{flex:1;overflow:hidden;position:relative}
+.ticker-inner{display:flex;gap:40px;animation:ticker 60s linear infinite;white-space:nowrap;padding-right:40px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{font-size:10px;color:#888;flex-shrink:0}
+.ticker-item span{color:var(--green);margin-left:8px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(26,42,26,0.2)}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:10px;color:#333;letter-spacing:1px}
+.stat-val{font-family:var(--font-vt);font-size:18px;color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.amber{color:var(--amber)}
+.threat-bar{height:4px;background:var(--border);margin-top:3px;width:100%}
+.threat-fill{height:100%;transition:width 1s ease}
+.threat-critical{background:var(--red);box-shadow:0 0 6px var(--red)}
+.threat-high{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+.threat-med{background:#ffff00}
+.threat-low{background:var(--green)}
+.conflict-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(26,42,26,0.2);align-items:flex-start}
+.conflict-item:last-child{border-bottom:none}
+.conflict-flag{font-size:16px;min-width:20px}
+.conflict-name{font-size:10px;color:var(--green-dim);line-height:1.4}
+.conflict-status{font-size:9px;color:#444;margin-top:1px}
+.conflict-intensity{font-size:8px;letter-spacing:1px;padding:1px 4px;border:1px solid}
+.intensity-active{border-color:var(--red);color:var(--red)}
+.intensity-tense{border-color:var(--amber);color:var(--amber)}
+.intensity-monitor{border-color:#333;color:#444}
+.member-track-item{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(26,42,26,0.2);align-items:center}
+.member-track-item:last-child{border-bottom:none}
+.mt-avatar{width:28px;height:28px;border:1px solid var(--green-dim);display:flex;align-items:center;justify-content:center;font-family:var(--font-vt);font-size:16px;color:var(--green);flex-shrink:0}
+.mt-name{font-size:10px;color:var(--green);line-height:1.3}
+.mt-rank{font-size:9px;color:#333}
+.mt-activity{font-size:9px;color:#1a4a1a;margin-top:1px}
+.mt-status{margin-right:auto;font-size:8px;letter-spacing:1px;padding:2px 5px;border:1px solid}
+.mt-online{border-color:var(--green);color:var(--green)}
+.mt-offline{border-color:#1a2a1a;color:#222}
+.gm-map-wrap{width:100%;height:100%;position:relative}
+#gmCesium{width:100%;height:100%}
+.map-overlay-stats{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.85);border:1px solid var(--border);padding:10px;z-index:5;min-width:160px}
+.map-overlay-title{font-size:8px;color:#333;letter-spacing:3px;margin-bottom:7px}
+.mos-row{display:flex;justify-content:space-between;gap:20px;font-size:10px;padding:2px 0}
+.mos-lbl{color:#333}
+.mos-val{color:var(--green);font-family:var(--font-vt);font-size:14px}
+.map-legend{position:absolute;bottom:40px;right:10px;background:rgba(0,0,0,0.85);border:1px solid var(--border);padding:8px 10px;z-index:5}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:9px;color:#333;padding:2px 0}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.alert-ticker{padding:6px 12px;background:rgba(255,0,51,0.05);border-right:3px solid var(--red);margin-bottom:4px;font-size:10px;color:var(--red);line-height:1.4;cursor:pointer;transition:background 0.2s}
+.alert-ticker:hover{background:rgba(255,0,51,0.1)}
+.alert-ticker.amber{border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,0.05)}
+.alert-ticker:hover.amber{background:rgba(255,170,0,0.1)}
+.news-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:300;display:none;align-items:center;justify-content:center}
+.news-detail-box{border:1px solid var(--green-dim);background:var(--panel);width:90%;max-width:600px;max-height:80vh;overflow-y:auto;padding:24px;position:relative}
+.news-detail-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.ndb-close{position:absolute;top:12px;left:12px;background:transparent;border:1px solid var(--border);color:#333;cursor:pointer;font-family:var(--font-mono);font-size:10px;padding:3px 8px}
+.ndb-close:hover{border-color:var(--red);color:var(--red)}
+.ndb-cat{font-size:9px;letter-spacing:2px;margin-bottom:8px}
+.ndb-title{font-family:var(--font-vt);font-size:22px;color:var(--green);letter-spacing:2px;line-height:1.3;margin-bottom:10px}
+.ndb-meta{font-size:9px;color:#333;margin-bottom:14px;display:flex;gap:12px}
+.ndb-body{font-size:12px;color:#555;line-height:2;border-right:2px solid var(--border);padding-right:12px}
+.ndb-tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:5px}
+.ndb-tag{font-size:9px;color:#333;border:1px solid #1a2a1a;padding:2px 7px;letter-spacing:1px}
+.pulse-marker{animation:pulse-map 2s infinite}
+@keyframes pulse-map{0%,100%{opacity:1}50%{opacity:0.4}}
+.gm-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(255,0,51,0.03)}
+.gm-title-txt{font-family:var(--font-vt);font-size:16px;letter-spacing:3px;color:var(--red)}
+.gm-live-badge{font-size:9px;color:var(--red);border:1px solid rgba(255,0,51,0.5);padding:2px 7px;letter-spacing:2px;animation:blink-border 1.5s infinite}
+@media(max-width:900px){.gm-layout{grid-template-columns:1fr}.gm-left,.gm-right{max-height:300px}}
+
+/* MAP TAB STYLES */
 #cesiumContainer{width:100%;height:calc(100vh - 180px)}
 @media(max-width:680px){.sidebar{width:155px}.grid4{grid-template-columns:1fr 1fr}}
-</style>
-</head>
-<body>
-<div class="scanline"></div>
 
-<div id="loadingScreen">
-  <div class="load-title glow cursor">NEXUS</div>
-  <div class="load-bar"><div class="load-fill"></div></div>
-  <div class="load-txt">CONNECTING TO DATABASE...</div>
+/* LANGUAGE TOGGLE */
+.lang-btn{background:transparent;border:1px solid var(--border);color:#333;font-family:var(--font-mono);font-size:9px;padding:3px 8px;cursor:pointer;letter-spacing:2px;transition:all 0.2s}
+.lang-btn.active{border-color:var(--green);color:var(--green);background:rgba(0,255,65,0.05)}
+.lang-btn:hover{border-color:var(--green-dim);color:var(--green-dim)}
+
+/* BIOMETRIC BUTTON */
+.bio-btn{position:relative;cursor:pointer;user-select:none;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px}
+.bio-btn svg{filter:drop-shadow(0 0 6px rgba(0,255,65,0.2));transition:filter 0.3s}
+.bio-btn:active svg,.bio-btn.pressing svg{filter:drop-shadow(0 0 16px rgba(0,255,65,0.7))}
+.bio-label{font-size:9px;color:#333;letter-spacing:3px;text-transform:uppercase;transition:color 0.3s;text-align:center}
+.bio-btn.pressing .bio-label{color:var(--green)}
+#bioProgress{stroke-dasharray:240;stroke-dashoffset:240;transition:stroke-dashoffset 0.1s linear}
+
+/* WELCOME OVERLAY */
+#welcomeOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:9500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+#welcomeOverlay.active{display:flex}
+.wo-icon{font-family:var(--font-vt);font-size:60px;color:var(--green);text-shadow:0 0 30px var(--green),0 0 60px rgba(0,255,65,0.4);animation:pulse-glow 1s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{text-shadow:0 0 20px var(--green)}50%{text-shadow:0 0 40px var(--green),0 0 80px rgba(0,255,65,0.5)}}
+.wo-msg{font-family:var(--font-vt);font-size:28px;color:var(--green);letter-spacing:4px;text-align:center;max-width:500px;line-height:1.4}
+.wo-sub{font-size:10px;color:var(--amber);letter-spacing:4px;text-align:center}
+.wo-bar{width:200px;height:1px;background:var(--border);margin-top:10px}
+.wo-fill{height:100%;background:var(--green);animation:wo-prog 4s linear forwards}
+@keyframes wo-prog{0%{width:0}100%{width:100%}}
+</style> </head> <body> <div class="scanline"></div>
+<div id="loadingScreen"> <div class="load-title glow cursor">NEXUS</div> <div class="load-bar"><div class="load-fill"></div></div> <div class="load-txt" id="loadTxt">CONNECTING TO DATABASE...</div> </div>
+<div id="sysOverlay"> <div> <div class="sys-msg" id="sysMsg">تم ايقاف النظام باوامر القائد الاعلى</div> <div style="text-align:center;margin-top:18px;font-size:11px;color:#222;letter-spacing:4px">NEXUS COMMAND TERMINATED</div> </div> </div>
+<div id="lawsModal"> <div class="laws-box"> <div class="laws-hdr glow">القوانين والشروط - TERMS OF SERVICE</div> <div class="laws-body"> <h3>المادة الاولى - السلوك العام</h3><p>يلتزم جميع الاعضاء بالاحترام الكامل للتسلسل الهرمي العسكري. لا يجوز التجاوز على صلاحيات الرتب العليا.</p> <h3>المادة الثانية - سرية المعلومات</h3><p>يُحظر تسريب اي معلومات داخلية او مشاركة بيانات الوصول مع اطراف ثالثة.</p> <h3>المادة الثالثة - استخدام النظام</h3><p>يُستخدم النظام لأغراض تنظيمية وادارية فقط. اي استخدام خارج النطاق يُعدّ مخالفة.</p> <h3>المادة الرابعة - العقوبات</h3><p>تراكم المخالفات يؤدي الى تجميد الحساب او الحظر الدائم. القرار النهائي للقائد الاعلى.</p> <h3>المادة الخامسة - سلطة القائد الاعلى</h3><p>قرارات القائد الاعلى نهائية وملزمة وغير قابلة للطعن.</p> </div> <div class="laws-ftr"> <input type="checkbox" id="lawsCheck" style="accent-color:var(--green);width:13px;height:13px"> <label for="lawsCheck" style="font-size:11px;color:#555;cursor:pointer;letter-spacing:1px">لقد قرأت وأوافق على جميع البنود</label> <button class="btn btn-sm" onclick="approveLaws()" style="margin-right:auto">موافق - AGREE</button> </div> </div> </div>
+<div id="loginScreen"> <div class="login-box"> <div style="position:absolute;top:12px;left:12px;display:flex;gap:0"> <button class="lang-btn active" id="langAR" onclick="setLang('ar')">AR</button> <button class="lang-btn" id="langEN" onclick="setLang('en')">EN</button> </div> <div class="login-title glow cursor" id="loginTitle">NEXUS COMMAND</div> <div class="login-sub" id="loginSub">SECURE MILITARY MANAGEMENT SYSTEM</div> <div class="fg"><label class="fl" id="lbl-name">الاسم — NAME</label><input class="fi" id="loginUser" placeholder="OPERATIVE NAME" autocomplete="off"></div> <div class="fg"><label class="fl" id="lbl-sym">الرمز — SYMBOL</label><input class="fi" id="loginSym" placeholder="SYM-CODE" autocomplete="off"></div> <div class="fg"><label class="fl" id="lbl-code">الكود — ACCESS CODE</label><input type="password" class="fi" id="loginPass" placeholder="••••••••" autocomplete="off"></div> <div id="loginErr" class="err" style="display:none"></div> <div style="margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:14px"> <div id="bioBtn" class="bio-btn" onmousedown="startBio(event)" onmouseup="cancelBio()" onmouseleave="cancelBio()" ontouchstart="startBio(event)" ontouchend="cancelBio()"> <svg viewBox="0 0 80 80" width="80" height="80"><circle cx="40" cy="40" r="38" fill="none" stroke="var(--green-dim)" stroke-width="1"/><circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" stroke-width="1"/><path d="M40 18 C28 18 20 27 20 40 C20 53 28 62 40 62 C52 62 60 53 60 40" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/><path d="M40 24 C31 24 25 31 25 40 C25 49 31 56 40 56 C49 56 55 49 55 40" fill="none" stroke="var(--green-dim)" stroke-width="1" stroke-linecap="round"/><path d="M40 30 C34 30 30 34 30 40 C30 46 34 50 40 50" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/><path d="M40 36 C37 36 35 38 35 40 C35 43 37 44 40 44" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/><circle cx="40" cy="40" r="2" fill="var(--green)"/><circle cx="40" cy="40" r="38" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="240" stroke-dashoffset="240" id="bioProgress" style="transition:none;transform:rotate(-90deg);transform-origin:40px 40px"/></svg> <div class="bio-label" id="bioLabel">HOLD TO AUTHENTICATE</div> </div> </div> </div> </div>
+
+<!-- WELCOME OVERLAY -->
+<div id="welcomeOverlay">
+  <div class="wo-icon">◈</div>
+  <div class="wo-msg" id="woMsg"></div>
+  <div class="wo-sub" id="woSub">IDENTITY CONFIRMED — ACCESS GRANTED</div>
+  <div class="wo-bar"><div class="wo-fill" id="woBar"></div></div>
 </div>
 
-<div id="sysOverlay">
-  <div>
-    <div class="sys-msg" id="sysMsg">تم ايقاف النظام باوامر القائد الاعلى</div>
-    <div style="text-align:center;margin-top:18px;font-size:11px;color:#222;letter-spacing:4px">NEXUS COMMAND TERMINATED</div>
+<!-- NEWS DETAIL OVERLAY -->
+<div id="newsDetailOverlay" class="news-detail-overlay" onclick="if(event.target===this)closeNewsDetail()">
+  <div class="news-detail-box">
+    <button class="ndb-close" onclick="closeNewsDetail()">✕ اغلاق</button>
+    <div class="ndb-cat" id="ndbCat"></div>
+    <div class="ndb-title" id="ndbTitle"></div>
+    <div class="ndb-meta" id="ndbMeta"></div>
+    <div class="ndb-body" id="ndbBody"></div>
+    <div class="ndb-tags" id="ndbTags"></div>
   </div>
 </div>
 
-<div id="lawsModal">
-  <div class="laws-box">
-    <div class="laws-hdr glow">القوانين والشروط - TERMS OF SERVICE</div>
-    <div class="laws-body">
-      <h3>المادة الاولى - السلوك العام</h3><p>يلتزم جميع الاعضاء بالاحترام الكامل للتسلسل الهرمي العسكري. لا يجوز التجاوز على صلاحيات الرتب العليا.</p>
-      <h3>المادة الثانية - سرية المعلومات</h3><p>يُحظر تسريب اي معلومات داخلية او مشاركة بيانات الوصول مع اطراف ثالثة.</p>
-      <h3>المادة الثالثة - استخدام النظام</h3><p>يُستخدم النظام لأغراض تنظيمية وادارية فقط. اي استخدام خارج النطاق يُعدّ مخالفة.</p>
-      <h3>المادة الرابعة - العقوبات</h3><p>تراكم المخالفات يؤدي الى تجميد الحساب او الحظر الدائم. القرار النهائي للقائد الاعلى.</p>
-      <h3>المادة الخامسة - سلطة القائد الاعلى</h3><p>قرارات القائد الاعلى نهائية وملزمة وغير قابلة للطعن.</p>
-    </div>
-    <div class="laws-ftr">
-      <input type="checkbox" id="lawsCheck" style="accent-color:var(--green);width:13px;height:13px">
-      <label for="lawsCheck" style="font-size:11px;color:#555;cursor:pointer;letter-spacing:1px">لقد قرأت وأوافق على جميع البنود</label>
-      <button class="btn btn-sm" onclick="approveLaws()" style="margin-right:auto">موافق - AGREE</button>
-    </div>
-  </div>
-</div>
+<div id="app"> <div class="topbar"> <div class="tb-logo glow cursor">NEXUS CMD</div> <div class="tb-div"></div> <div class="tb-dot"></div> <div class="tb-user" id="tbUser">---</div> <div style="font-size:10px;color:#1a4a1a;letter-spacing:1px" id="tbSym">---</div> <div class="tb-rank" id="tbRank">---</div> <div class="tb-time" id="tbTime"></div> <div class="sync-ind s-ok" id="syncInd">SYNC</div> <button class="lang-btn" id="topLangBtn" onclick="toggleLang()" style="font-size:9px;padding:3px 7px">AR/EN</button> <button class="tb-btn btn-r" id="logoutBtn" onclick="doLogout()">خروج</button> </div>
+<div class="main-layout"> <div class="sidebar"> <div class="sb-sec"> <div class="sb-lbl">الرئيسية</div> <div class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard"><span class="nav-icon">[*]</span> لوحة التحكم</div> <div class="nav-item" onclick="showPanel('stats')" id="nav-stats"><span class="nav-icon">[#]</span> الاحصائيات</div> </div> <div class="sb-sec"> <div class="sb-lbl">التواصل</div> <div class="nav-item" onclick="showPanel('messages')" id="nav-messages"><span class="nav-icon">[M]</span> الرسائل<span class="nav-badge" id="msgBadge" style="display:none">0</span></div> <div class="nav-item" onclick="showPanel('ai')" id="nav-ai"><span class="nav-icon">[A]</span> المساعد الذكي</div> </div> <div class="sb-sec"> <div class="sb-lbl">الادارة</div> <div class="nav-item" onclick="showPanel('requests')" id="nav-requests"><span class="nav-icon">[R]</span> الطلبات<span class="nav-badge" id="reqBadge" style="display:none">0</span></div> <div class="nav-item" onclick="showPanel('documents')" id="nav-documents"><span class="nav-icon">[D]</span> المستندات</div> <div class="nav-item" onclick="showPanel('violations')" id="nav-violations"><span class="nav-icon">[V]</span> المخالفات</div> </div> <div class="sb-sec"> <div class="sb-lbl">المرافق</div>
+    <div class="nav-item" onclick="showPanel('globalmonitor')" id="nav-globalmonitor"><span class="nav-icon" style="color:var(--red)">[W]</span> <span style="color:var(--red)">مراقبة عالمية</span></div>
+    <div class="nav-item" onclick="showPanel('map')" id="nav-map"><span class="nav-icon">[G]</span> GPS خريطة</div> <div class="nav-item" onclick="showPanel('laws')" id="nav-laws"><span class="nav-icon">[L]</span> القوانين</div> </div> <div class="sb-sec" id="adminSec" style="display:none"> <div class="sb-lbl" style="color:var(--red)">القيادة</div> <div class="nav-item" onclick="showPanel('users')" id="nav-users"><span class="nav-icon" style="color:var(--red)">[U]</span> المستخدمون</div> <div class="nav-item" onclick="showPanel('createaccount')" id="nav-createaccount"><span class="nav-icon" style="color:var(--amber)">[+]</span> انشاء حساب</div> <div class="nav-item" onclick="showPanel('commander')" id="nav-commander"><span class="nav-icon" style="color:var(--red)">[C]</span> لوحة القائد</div> </div> </div>
 
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-title glow cursor">NEXUS COMMAND</div>
-    <div class="login-sub">SECURE MILITARY MANAGEMENT SYSTEM</div>
-    <div class="fg"><label class="fl">اسم المستخدم - USERNAME</label><input class="fi" id="loginUser" placeholder="USERNAME" autocomplete="off"></div>
-    <div class="fg"><label class="fl">كلمة المرور - PASSWORD</label><input type="password" class="fi" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div id="loginErr" class="err" style="display:none"></div>
-    <div style="margin-top:20px"><button class="btn glow" onclick="doLogin()">دخول - ACCESS</button></div>
-  </div>
-</div>
+<div class="content"> <div class="panel active" id="panel-dashboard"> <div class="ph"><div class="pt glow">لوحة التحكم - COMMAND CENTER</div><div style="font-size:10px;color:#222" id="dashDate"></div></div> <div class="grid4" style="margin-bottom:15px"> <div class="sc"><div class="sn glow" id="st-u">0</div><div class="sl">المستخدمون</div></div> <div class="sc"><div class="sn glow" id="st-r">0</div><div class="sl">الطلبات</div></div> <div class="sc"><div class="sn glow" id="st-d">0</div><div class="sl">المستندات</div></div> <div class="sc"><div class="sn glow" id="st-o">0</div><div class="sl">متصلون</div></div> </div> <div class="grid2"> <div class="card"><div class="card-lbl">توزيع الرتب</div><div id="rkChart" class="mc" style="margin-top:9px"></div><div id="rkList" style="margin-top:9px;font-size:10px;color:#333"></div></div> <div class="card"><div class="card-lbl">النشاط الاخير</div><div id="actLog" style="margin-top:9px;font-size:11px;color:#333;line-height:2.2"></div></div> </div> <div style="margin-top:12px" id="myViolsD"></div> <div style="margin-top:7px" id="myReqsD"></div> </div>
+<div class="panel" id="panel-stats"> <div class="ph"><div class="pt glow">الاحصائيات - STATISTICS</div></div> <div class="grid4" style="margin-bottom:15px"> <div class="sc"><div class="sn glow" id="sts-u">0</div><div class="sl">الاعضاء</div></div> <div class="sc"><div class="sn glow" id="sts-a">0</div><div class="sl">نشطون</div></div> <div class="sc"><div class="sn glow" id="sts-r">0</div><div class="sl">الطلبات</div></div> <div class="sc"><div class="sn glow" id="sts-v">0</div><div class="sl">مخالفات</div></div> </div> <div class="card"><div class="card-lbl">توزيع الرتب</div><div id="rkDetail" style="margin-top:13px"></div></div> </div>
+<div class="panel" id="panel-messages"> <div class="ph"><div class="pt glow">الرسائل - MESSAGES</div><button class="btn btn-sm" onclick="openNewMsg()">رسالة جديدة</button></div> <div id="msgListView"> <div class="tabs"><div class="tab active" onclick="switchMsgTab('inbox',this)">الوارد</div><div class="tab" onclick="switchMsgTab('sent',this)">المرسلة</div></div> <div id="msgInbox"></div><div id="msgSent" style="display:none"></div> </div> <div id="msgChatView" style="display:none"> <button class="btn btn-sm" style="margin-bottom:9px" onclick="closeChat()">عودة</button> <div class="chat-win"> <div class="chat-hdr"><div style="font-size:12px;color:var(--green)" id="chatWith"></div><div style="font-size:10px;color:#333" id="chatWithRk"></div></div> <div class="chat-msgs" id="chatMsgs"></div> <div class="ci-row"><input class="ci" id="chatInput" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="btn btn-sm" onclick="sendMsg()">ارسال</button></div> </div> </div> <div id="newMsgModal" style="display:none;margin-top:13px"> <div class="card"><div class="card-lbl">رسالة جديدة</div> <div style="margin-top:11px"> <div class="fg"><label class="fl">المستلم</label><select class="fi" id="msgTo"></select></div> <div class="fg"><label class="fl">الموضوع</label><input class="fi" id="msgSubj" placeholder="موضوع الرسالة"></div> <div class="fg"><label class="fl">الرسالة</label><textarea class="fi" id="msgBody" placeholder="محتوى الرسالة..."></textarea></div> <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm glow" onclick="sendNewMsg()">ارسال</button><button class="btn btn-sm btn-r" onclick="closeNewMsg()">الغاء</button></div> </div> </div> </div> </div>
+<div class="panel" id="panel-ai"> <div class="ph"><div class="pt glow">المساعد الذكي - AI INVESTIGATOR</div><div style="font-size:10px;color:var(--amber);letter-spacing:2px">NEXUS AI v2.0</div></div> <div class="alert al-a" style="margin-bottom:13px">المساعد الذكي يعمل كمستشار فقط. القرار النهائي دائما بشري.</div> <div class="ai-wrap"> <div class="ai-msgs" id="aiMsgs"><div class="ai-msg assistant"><div class="ai-tag">NEXUS AI</div>مرحبا. انا NEXUS AI. كيف يمكنني مساعدتك؟</div></div> <div class="ai-ir"><input class="ci" id="aiInput" placeholder="اكتب سؤالك..." onkeydown="if(event.key==='Enter')sendAI()"><button class="btn btn-sm" onclick="sendAI()">ارسال</button><button class="btn btn-xs" onclick="clearAI()" style="color:#333;border-color:#111">مسح</button></div> </div> </div>
+<div class="panel" id="panel-requests"> <div class="ph"><div class="pt glow">الطلبات الادارية - REQUESTS</div><button class="btn btn-sm" onclick="openNewReq()">طلب جديد</button></div> <div class="tabs"><div class="tab active" onclick="switchReqTab('mine',this)">طلباتي</div><div class="tab" onclick="switchReqTab('incoming',this)" id="incTab" style="display:none">واردة</div></div> <div id="reqMine"></div><div id="reqInc" style="display:none"></div> <div id="newReqForm" style="display:none;margin-top:13px"> <div class="card"><div class="card-lbl">طلب جديد</div> <div style="margin-top:11px"> <div class="fg"><label class="fl">نوع الطلب</label><select class="fi" id="reqType"><option value="leave">طلب اجازة</option><option value="promotion">طلب ترقية</option><option value="transfer">طلب نقل</option><option value="permission">طلب صلاحية مؤقتة</option><option value="clarification">طلب توضيح اداري</option></select></div> <div class="fg"><label class="fl">التفاصيل</label><textarea class="fi" id="reqDetails" placeholder="اشرح طلبك..."></textarea></div> <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm glow" onclick="submitReq()">تقديم</button><button class="btn btn-sm btn-r" onclick="closeNewReq()">الغاء</button></div> </div> </div> </div> </div>
+<div class="panel" id="panel-documents"> <div class="ph"><div class="pt glow">مركز المستندات - DOCUMENTS</div><button class="btn btn-sm" id="addDocBtn" style="display:none" onclick="openAddDoc()">اضافة مستند</button></div> <div class="tabs"><div class="tab active" onclick="swDocTab('all',this)">الكل</div><div class="tab" onclick="swDocTab('general',this)">عام</div><div class="tab" onclick="swDocTab('internal',this)">داخلي</div><div class="tab" onclick="swDocTab('secret',this)">سري</div></div> <div id="docList"></div> <div id="addDocForm" style="display:none;margin-top:13px"> <div class="card"><div class="card-lbl">مستند جديد</div> <div style="margin-top:11px"> <div class="fr"><div class="fg"><label class="fl">العنوان</label><input class="fi" id="docTitle" placeholder="عنوان المستند"></div><div class="fg"><label class="fl">التصنيف</label><select class="fi" id="docClass"><option value="general">عام</option><option value="internal">داخلي</option><option value="secret">سري</option></select></div></div> <div class="fg"><label class="fl">الرتبة الادنى</label><select class="fi" id="docMinRk"></select></div> <div class="fg"><label class="fl">المحتوى</label><textarea class="fi" style="height:90px" id="docContent" placeholder="محتوى المستند..."></textarea></div> <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm glow" onclick="submitDoc()">حفظ</button><button class="btn btn-sm btn-r" onclick="closeAddDoc()">الغاء</button></div> </div> </div> </div> </div>
+<div class="panel" id="panel-violations"> <div class="ph"><div class="pt glow" style="color:var(--red)">المخالفات - VIOLATIONS</div><button class="btn btn-sm btn-r" id="addViolBtn" style="display:none" onclick="openAddViol()">تسجيل مخالفة</button></div> <div id="violList"></div> <div id="addViolForm" style="display:none;margin-top:13px"> <div class="card" style="border-color:rgba(255,0,51,0.3)"><div class="card-lbl" style="color:var(--red)">مخالفة جديدة</div> <div style="margin-top:11px"> <div class="fr"><div class="fg"><label class="fl">المخالف</label><select class="fi" id="violUser"></select></div><div class="fg"><label class="fl">نوع المخالفة</label><select class="fi" id="violType"><option>غياب غير مبرر</option><option>تجاوز الصلاحيات</option><option>مخالفة الاوامر</option><option>سوء السلوك</option><option>تسريب معلومات</option><option>اخرى</option></select></div></div> <div class="fg"><label class="fl">درجة الخطورة</label><select class="fi" id="violSev"><option value="low">منخفضة</option><option value="med">متوسطة</option><option value="high">عالية</option></select></div> <div class="fg"><label class="fl">التفاصيل</label><textarea class="fi" id="violDet" placeholder="تفاصيل المخالفة..."></textarea></div> <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm btn-r" onclick="submitViol()">تسجيل</button><button class="btn btn-sm" onclick="closeAddViol()">الغاء</button></div> </div> </div> </div> </div>
 
-<div id="app">
-  <div class="topbar">
-    <div class="tb-logo glow cursor">NEXUS CMD</div>
-    <div class="tb-div"></div>
-    <div class="tb-dot"></div>
-    <div class="tb-user" id="tbUser">---</div>
-    <div class="tb-rank" id="tbRank">---</div>
-    <div class="tb-time" id="tbTime"></div>
-    <div class="sync-ind s-ok" id="syncInd">SYNC</div>
-    <button class="tb-btn btn-r" onclick="doLogout()">خروج</button>
-  </div>
-
-  <div class="main-layout">
-    <div class="sidebar">
-      <div class="sb-sec">
-        <div class="sb-lbl">الرئيسية</div>
-        <div class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard"><span class="nav-icon">[*]</span> لوحة التحكم</div>
-        <div class="nav-item" onclick="showPanel('stats')" id="nav-stats"><span class="nav-icon">[#]</span> الاحصائيات</div>
+<!-- GLOBAL MONITOR PANEL -->
+<div class="panel" id="panel-globalmonitor">
+  <div class="gm-layout">
+    <!-- LEFT: News Feed -->
+    <div class="gm-left">
+      <div class="gm-header">
+        <div class="gm-title-txt">WORLD FEED</div>
+        <div class="gm-live-badge">● LIVE</div>
       </div>
-      <div class="sb-sec">
-        <div class="sb-lbl">التواصل</div>
-        <div class="nav-item" onclick="showPanel('messages')" id="nav-messages"><span class="nav-icon">[M]</span> الرسائل<span class="nav-badge" id="msgBadge" style="display:none">0</span></div>
-        <div class="nav-item" onclick="showPanel('ai')" id="nav-ai"><span class="nav-icon">[A]</span> المساعد الذكي</div>
+      <!-- Critical Alerts -->
+      <div class="gm-sec">
+        <div class="gm-sec-title"><div class="live-dot"></div> تنبيهات حرجة</div>
+        <div id="gmAlerts"></div>
       </div>
-      <div class="sb-sec">
-        <div class="sb-lbl">الادارة</div>
-        <div class="nav-item" onclick="showPanel('requests')" id="nav-requests"><span class="nav-icon">[R]</span> الطلبات<span class="nav-badge" id="reqBadge" style="display:none">0</span></div>
-        <div class="nav-item" onclick="showPanel('documents')" id="nav-documents"><span class="nav-icon">[D]</span> المستندات</div>
-        <div class="nav-item" onclick="showPanel('violations')" id="nav-violations"><span class="nav-icon">[V]</span> المخالفات</div>
-      </div>
-      <div class="sb-sec">
-        <div class="sb-lbl">المرافق</div>
-        <div class="nav-item" onclick="showPanel('map')" id="nav-map"><span class="nav-icon">[G]</span> GPS خريطة</div>
-        <div class="nav-item" onclick="showPanel('laws')" id="nav-laws"><span class="nav-icon">[L]</span> القوانين</div>
-      </div>
-      <div class="sb-sec" id="adminSec" style="display:none">
-        <div class="sb-lbl" style="color:var(--red)">القيادة</div>
-        <div class="nav-item" onclick="showPanel('users')" id="nav-users"><span class="nav-icon" style="color:var(--red)">[U]</span> المستخدمون</div>
-        <div class="nav-item" onclick="showPanel('createaccount')" id="nav-createaccount"><span class="nav-icon" style="color:var(--amber)">[+]</span> انشاء حساب</div>
-        <div class="nav-item" onclick="showPanel('commander')" id="nav-commander"><span class="nav-icon" style="color:var(--red)">[C]</span> لوحة القائد</div>
+      <!-- News Items -->
+      <div class="gm-sec" style="flex:1;overflow-y:auto;border-bottom:none">
+        <div class="gm-sec-title">اخبار عسكرية ودولية</div>
+        <div id="gmNewsFeed"></div>
       </div>
     </div>
 
-    <div class="content">
-      <div class="panel active" id="panel-dashboard">
-        <div class="ph"><div class="pt glow">لوحة التحكم - COMMAND CENTER</div><div style="font-size:10px;color:#222" id="dashDate"></div></div>
-        <div class="grid4" style="margin-bottom:15px">
-          <div class="sc"><div class="sn glow" id="st-u">0</div><div class="sl">المستخدمون</div></div>
-          <div class="sc"><div class="sn glow" id="st-r">0</div><div class="sl">الطلبات</div></div>
-          <div class="sc"><div class="sn glow" id="st-d">0</div><div class="sl">المستندات</div></div>
-          <div class="sc"><div class="sn glow" id="st-o">0</div><div class="sl">متصلون</div></div>
+    <!-- CENTER: Map -->
+    <div class="gm-center">
+      <div class="gm-map-wrap">
+        <div id="gmCesium"></div>
+        <div class="map-overlay-stats">
+          <div class="map-overlay-title">احصائيات النظام</div>
+          <div class="mos-row"><span class="mos-lbl">اعضاء متصلون</span><span class="mos-val" id="gm-online">0</span></div>
+          <div class="mos-row"><span class="mos-lbl">نقاط نشطة</span><span class="mos-val" id="gm-points">0</span></div>
+          <div class="mos-row"><span class="mos-lbl">تهديدات</span><span class="mos-val red" id="gm-threats">0</span></div>
+          <div class="mos-row"><span class="mos-lbl">تحديث</span><span class="mos-val" id="gm-update">--:--</span></div>
         </div>
-        <div class="grid2">
-          <div class="card"><div class="card-lbl">توزيع الرتب</div><div id="rkChart" class="mc" style="margin-top:9px"></div><div id="rkList" style="margin-top:9px;font-size:10px;color:#333"></div></div>
-          <div class="card"><div class="card-lbl">النشاط الاخير</div><div id="actLog" style="margin-top:9px;font-size:11px;color:#333;line-height:2.2"></div></div>
-        </div>
-        <div style="margin-top:12px" id="myViolsD"></div>
-        <div style="margin-top:7px" id="myReqsD"></div>
-      </div>
-
-      <div class="panel" id="panel-stats">
-        <div class="ph"><div class="pt glow">الاحصائيات - STATISTICS</div></div>
-        <div class="grid4" style="margin-bottom:15px">
-          <div class="sc"><div class="sn glow" id="sts-u">0</div><div class="sl">الاعضاء</div></div>
-          <div class="sc"><div class="sn glow" id="sts-a">0</div><div class="sl">نشطون</div></div>
-          <div class="sc"><div class="sn glow" id="sts-r">0</div><div class="sl">الطلبات</div></div>
-          <div class="sc"><div class="sn glow" id="sts-v">0</div><div class="sl">مخالفات</div></div>
-        </div>
-        <div class="card"><div class="card-lbl">توزيع الرتب</div><div id="rkDetail" style="margin-top:13px"></div></div>
-      </div>
-
-      <div class="panel" id="panel-messages">
-        <div class="ph"><div class="pt glow">الرسائل - MESSAGES</div><button class="btn btn-sm" onclick="openNewMsg()">رسالة جديدة</button></div>
-        <div id="msgListView">
-          <div class="tabs"><div class="tab active" onclick="switchMsgTab('inbox',this)">الوارد</div><div class="tab" onclick="switchMsgTab('sent',this)">المرسلة</div></div>
-          <div id="msgInbox"></div><div id="msgSent" style="display:none"></div>
-        </div>
-        <div id="msgChatView" style="display:none">
-          <button class="btn btn-sm" style="margin-bottom:9px" onclick="closeChat()">عودة</button>
-          <div class="chat-win">
-            <div class="chat-hdr"><div style="font-size:12px;color:var(--green)" id="chatWith"></div><div style="font-size:10px;color:#333" id="chatWithRk"></div></div>
-            <div class="chat-msgs" id="chatMsgs"></div>
-            <div class="ci-row"><input class="ci" id="chatInput" placeholder="اكتب رسالة..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="btn btn-sm" onclick="sendMsg()">ارسال</button></div>
-          </div>
-        </div>
-        <div id="newMsgModal" style="display:none;margin-top:13px">
-          <div class="card"><div class="card-lbl">رسالة جديدة</div>
-            <div style="margin-top:11px">
-              <div class="fg"><label class="fl">المستلم</label><select class="fi" id="msgTo"></select></div>
-              <div class="fg"><label class="fl">الموضوع</label><input class="fi" id="msgSubj" placeholder="موضوع الرسالة"></div>
-              <div class="fg"><label class="fl">الرسالة</label><textarea class="fi" id="msgBody" placeholder="محتوى الرسالة..."></textarea></div>
-              <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm glow" onclick="sendNewMsg()">ارسال</button><button class="btn btn-sm btn-r" onclick="closeNewMsg()">الغاء</button></div>
-            </div>
-          </div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> موقع عضو</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> بؤرة توتر</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> صاروخ / عملية</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00aaff"></div> تصريح دبلوماسي</div>
         </div>
       </div>
-
-      <div class="panel" id="panel-ai">
-        <div class="ph"><div class="pt glow">المساعد الذكي - AI INVESTIGATOR</div><div style="font-size:10px;color:var(--amber);letter-spacing:2px">NEXUS AI v2.0</div></div>
-        <div class="alert al-a" style="margin-bottom:13px">المساعد الذكي يعمل كمستشار فقط. القرار النهائي دائما بشري.</div>
-        <div class="ai-wrap">
-          <div class="ai-msgs" id="aiMsgs"><div class="ai-msg assistant"><div class="ai-tag">NEXUS AI</div>مرحبا. انا NEXUS AI. كيف يمكنني مساعدتك؟</div></div>
-          <div class="ai-ir"><input class="ci" id="aiInput" placeholder="اكتب سؤالك..." onkeydown="if(event.key==='Enter')sendAI()"><button class="btn btn-sm" onclick="sendAI()">ارسال</button><button class="btn btn-xs" onclick="clearAI()" style="color:#333;border-color:#111">مسح</button></div>
+      <!-- Ticker -->
+      <div class="ticker-wrap">
+        <div class="ticker-label">⚡ BREAKING</div>
+        <div class="ticker-track">
+          <div class="ticker-inner" id="gmTicker"></div>
         </div>
       </div>
+    </div>
 
-      <div class="panel" id="panel-requests">
-        <div class="ph"><div class="pt glow">الطلبات الادارية - REQUESTS</div><button class="btn btn-sm" onclick="openNewReq()">طلب جديد</button></div>
-        <div class="tabs"><div class="tab active" onclick="switchReqTab('mine',this)">طلباتي</div><div class="tab" onclick="switchReqTab('incoming',this)" id="incTab" style="display:none">واردة</div></div>
-        <div id="reqMine"></div><div id="reqInc" style="display:none"></div>
-        <div id="newReqForm" style="display:none;margin-top:13px">
-          <div class="card"><div class="card-lbl">طلب جديد</div>
-            <div style="margin-top:11px">
-              <div class="fg"><label class="fl">نوع الطلب</label><select class="fi" id="reqType"><option value="leave">طلب اجازة</option><option value="promotion">طلب ترقية</option><option value="transfer">طلب نقل</option><option value="permission">طلب صلاحية مؤقتة</option><option value="clarification">طلب توضيح اداري</option></select></div>
-              <div class="fg"><label class="fl">التفاصيل</label><textarea class="fi" id="reqDetails" placeholder="اشرح طلبك..."></textarea></div>
-              <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm glow" onclick="submitReq()">تقديم</button><button class="btn btn-sm btn-r" onclick="closeNewReq()">الغاء</button></div>
-            </div>
-          </div>
-        </div>
+    <!-- RIGHT: Stats & Member Tracking -->
+    <div class="gm-right">
+      <div class="gm-header">
+        <div class="gm-title-txt" style="color:var(--green)">INTEL</div>
+        <div style="font-size:9px;color:#333;letter-spacing:2px" id="gmLastRefresh">---</div>
       </div>
-
-      <div class="panel" id="panel-documents">
-        <div class="ph"><div class="pt glow">مركز المستندات - DOCUMENTS</div><button class="btn btn-sm" id="addDocBtn" style="display:none" onclick="openAddDoc()">اضافة مستند</button></div>
-        <div class="tabs"><div class="tab active" onclick="swDocTab('all',this)">الكل</div><div class="tab" onclick="swDocTab('general',this)">عام</div><div class="tab" onclick="swDocTab('internal',this)">داخلي</div><div class="tab" onclick="swDocTab('secret',this)">سري</div></div>
-        <div id="docList"></div>
-        <div id="addDocForm" style="display:none;margin-top:13px">
-          <div class="card"><div class="card-lbl">مستند جديد</div>
-            <div style="margin-top:11px">
-              <div class="fr"><div class="fg"><label class="fl">العنوان</label><input class="fi" id="docTitle" placeholder="عنوان المستند"></div><div class="fg"><label class="fl">التصنيف</label><select class="fi" id="docClass"><option value="general">عام</option><option value="internal">داخلي</option><option value="secret">سري</option></select></div></div>
-              <div class="fg"><label class="fl">الرتبة الادنى</label><select class="fi" id="docMinRk"></select></div>
-              <div class="fg"><label class="fl">المحتوى</label><textarea class="fi" style="height:90px" id="docContent" placeholder="محتوى المستند..."></textarea></div>
-              <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm glow" onclick="submitDoc()">حفظ</button><button class="btn btn-sm btn-r" onclick="closeAddDoc()">الغاء</button></div>
-            </div>
-          </div>
-        </div>
+      <!-- Threat Level -->
+      <div class="gm-sec">
+        <div class="gm-sec-title">مستوى التهديد العالمي</div>
+        <div id="gmThreatLevel"></div>
       </div>
-
-      <div class="panel" id="panel-violations">
-        <div class="ph"><div class="pt glow" style="color:var(--red)">المخالفات - VIOLATIONS</div><button class="btn btn-sm btn-r" id="addViolBtn" style="display:none" onclick="openAddViol()">تسجيل مخالفة</button></div>
-        <div id="violList"></div>
-        <div id="addViolForm" style="display:none;margin-top:13px">
-          <div class="card" style="border-color:rgba(255,0,51,0.3)"><div class="card-lbl" style="color:var(--red)">مخالفة جديدة</div>
-            <div style="margin-top:11px">
-              <div class="fr"><div class="fg"><label class="fl">المخالف</label><select class="fi" id="violUser"></select></div><div class="fg"><label class="fl">نوع المخالفة</label><select class="fi" id="violType"><option>غياب غير مبرر</option><option>تجاوز الصلاحيات</option><option>مخالفة الاوامر</option><option>سوء السلوك</option><option>تسريب معلومات</option><option>اخرى</option></select></div></div>
-              <div class="fg"><label class="fl">درجة الخطورة</label><select class="fi" id="violSev"><option value="low">منخفضة</option><option value="med">متوسطة</option><option value="high">عالية</option></select></div>
-              <div class="fg"><label class="fl">التفاصيل</label><textarea class="fi" id="violDet" placeholder="تفاصيل المخالفة..."></textarea></div>
-              <div style="display:flex;gap:7px;margin-top:9px"><button class="btn btn-sm btn-r" onclick="submitViol()">تسجيل</button><button class="btn btn-sm" onclick="closeAddViol()">الغاء</button></div>
-            </div>
-          </div>
-        </div>
+      <!-- Active Conflicts -->
+      <div class="gm-sec">
+        <div class="gm-sec-title">نزاعات نشطة</div>
+        <div id="gmConflicts"></div>
       </div>
-
-      <div class="panel" id="panel-map">
-        <div class="ph"><div class="pt glow">الخريطة التكتيكية - GPS MAP</div><div style="font-size:10px;color:var(--amber);letter-spacing:2px">3D HOLOGRAM</div></div>
-        <div style="border:1px solid var(--border)"><div id="cesiumContainer"></div></div>
+      <!-- Global Stats -->
+      <div class="gm-sec">
+        <div class="gm-sec-title">احصائيات عالمية</div>
+        <div id="gmWorldStats"></div>
       </div>
-
-      <div class="panel" id="panel-laws">
-        <div class="ph"><div class="pt glow">القوانين - LAWS</div><button class="btn btn-sm btn-r" id="editLawsBtn" style="display:none" onclick="editLaws()">تعديل</button></div>
-        <div id="lawsContent"></div>
-      </div>
-
-      <div class="panel" id="panel-users">
-        <div class="ph"><div class="pt glow">ادارة المستخدمين - USERS</div></div>
-        <div class="card" style="margin-bottom:13px"><div class="card-lbl">المتصلون الان</div><div id="onlineChips" class="chips"></div></div>
-        <div class="card"><div class="card-lbl" style="margin-bottom:13px">جميع الحسابات</div>
-          <table class="tbl"><thead><tr><th>المستخدم</th><th>الرتبة</th><th>الحالة</th><th>آخر دخول</th><th>اجراءات</th></tr></thead><tbody id="usersTb"></tbody></table>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-createaccount">
-        <div class="ph"><div class="pt glow">انشاء حساب - CREATE ACCOUNT</div></div>
-        <div style="max-width:470px">
-          <div class="card"><div class="card-lbl">بيانات الحساب الجديد</div>
-            <div style="margin-top:13px">
-              <div class="fg"><label class="fl">اسم المستخدم</label><input class="fi" id="newAccUser" placeholder="USERNAME" autocomplete="off"></div>
-              <div class="fg"><label class="fl">كلمة المرور</label><input type="password" class="fi" id="newAccPass" placeholder="MIN 6 CHARACTERS"></div>
-              <div class="fg"><label class="fl">الرتبة</label><select class="fi" id="newAccRk"></select></div>
-              <div id="newAccErr" class="err" style="display:none"></div>
-              <div id="newAccSuc" class="suc" style="display:none"></div>
-              <div style="margin-top:16px"><button class="btn glow" onclick="createAcc()">انشاء الحساب</button></div>
-            </div>
-          </div>
-          <div class="alert al-a" style="margin-top:13px">يمكن لرتبة لواء فما فوق انشاء حسابات جديدة بالاسم والرمز والرتبة.</div>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-commander">
-        <div class="ph"><div class="pt glow-red">لوحة القائد الاعلى - SUPREME COMMAND</div></div>
-        <div class="cmd-p">
-          <div style="font-family:var(--font-vt);font-size:17px;color:var(--red);letter-spacing:4px;margin-bottom:13px">سجل القرارات السيادية</div>
-          <div id="cmdLog" style="font-size:11px;color:#444;line-height:2.2;max-height:170px;overflow-y:auto"></div>
-        </div>
-        <div class="grid2" style="margin-bottom:13px">
-          <div class="card"><div class="card-lbl" style="color:var(--red)">عمليات سيادية</div>
-            <div style="display:flex;flex-direction:column;gap:7px;margin-top:11px">
-              <button class="btn btn-r" onclick="forceLaws()">فرض اعادة الموافقة على القوانين</button>
-              <button class="btn" onclick="pauseSys()">ايقاف مؤقت للنظام</button>
-              <button class="btn btn-r" onclick="if(confirm('تحذير: سيتم حذف جميع البيانات!'))destroySys()">التدمير الذاتي</button>
-            </div>
-          </div>
-          <div class="card"><div class="card-lbl">تغيير رتبة</div>
-            <div style="margin-top:11px">
-              <div class="fg"><label class="fl">المستخدم</label><select class="fi" id="rkUser"></select></div>
-              <div class="fg"><label class="fl">الرتبة الجديدة</label><select class="fi" id="rkNew"></select></div>
-              <button class="btn btn-sm btn-r" style="margin-top:7px" onclick="changeRk()">تغيير</button>
-            </div>
-          </div>
-        </div>
-        <div class="card"><div class="card-lbl">طلبات معلقة</div><div id="pendingAdm" style="margin-top:11px"></div></div>
+      <!-- Member Activity Tracker -->
+      <div class="gm-sec" style="flex:1;overflow-y:auto;border-bottom:none">
+        <div class="gm-sec-title">تتبع نشاط الاعضاء</div>
+        <div id="gmMemberTrack"></div>
       </div>
     </div>
   </div>
 </div>
+
+<div class="panel" id="panel-map"> <div class="ph"><div class="pt glow">الخريطة التكتيكية - GPS MAP</div><div style="font-size:10px;color:var(--amber);letter-spacing:2px">3D HOLOGRAM</div></div> <div style="border:1px solid var(--border)"><div id="cesiumContainer"></div></div> </div>
+<div class="panel" id="panel-laws"> <div class="ph"><div class="pt glow">القوانين - LAWS</div><button class="btn btn-sm btn-r" id="editLawsBtn" style="display:none" onclick="editLaws()">تعديل</button></div> <div id="lawsContent"></div> </div>
+<div class="panel" id="panel-users"> <div class="ph"><div class="pt glow">ادارة المستخدمين - USERS</div></div> <div class="card" style="margin-bottom:13px"><div class="card-lbl">المتصلون الان</div><div id="onlineChips" class="chips"></div></div> <div class="card"><div class="card-lbl" style="margin-bottom:13px">جميع الحسابات</div> <table class="tbl"><thead><tr><th>المستخدم</th><th>الرتبة</th><th>الحالة</th><th>آخر دخول</th><th>اجراءات</th></tr></thead><tbody id="usersTb"></tbody></table> </div> </div>
+<div class="panel" id="panel-createaccount"> <div class="ph"><div class="pt glow" id="ca-title">انشاء حساب - CREATE ACCOUNT</div></div> <div style="max-width:470px"> <div class="card"><div class="card-lbl" id="ca-lbl">بيانات الحساب الجديد</div> <div style="margin-top:13px"> <div class="fg"><label class="fl" id="ca-name">الاسم — NAME</label><input class="fi" id="newAccUser" placeholder="OPERATIVE NAME" autocomplete="off"></div> <div class="fg"><label class="fl" id="ca-sym">الرمز — SYMBOL</label><input class="fi" id="newAccSym" placeholder="e.g. AX-1LT" autocomplete="off"></div> <div class="fg"><label class="fl" id="ca-code">الكود — ACCESS CODE</label><input type="password" class="fi" id="newAccPass" placeholder="MIN 6 CHARACTERS"></div> <div class="fg"><label class="fl" id="ca-rank">الرتبة — RANK</label><select class="fi" id="newAccRk"></select></div> <div id="newAccErr" class="err" style="display:none"></div> <div id="newAccSuc" class="suc" style="display:none"></div> <div style="margin-top:16px"><button class="btn glow" onclick="createAcc()" id="ca-btn">انشاء الحساب — CREATE</button></div> </div> </div> <div class="alert al-a" style="margin-top:13px" id="ca-note">يمكن لرتبة لواء فما فوق انشاء حسابات جديدة.</div> </div> </div>
+<div class="panel" id="panel-commander"> <div class="ph"><div class="pt glow-red">لوحة القائد الاعلى - SUPREME COMMAND</div></div> <div class="cmd-p"> <div style="font-family:var(--font-vt);font-size:17px;color:var(--red);letter-spacing:4px;margin-bottom:13px">سجل القرارات السيادية</div> <div id="cmdLog" style="font-size:11px;color:#444;line-height:2.2;max-height:170px;overflow-y:auto"></div> </div> <div class="grid2" style="margin-bottom:13px"> <div class="card"><div class="card-lbl" style="color:var(--red)">عمليات سيادية</div> <div style="display:flex;flex-direction:column;gap:7px;margin-top:11px"> <button class="btn btn-r" onclick="forceLaws()">فرض اعادة الموافقة على القوانين</button> <button class="btn" onclick="pauseSys()">ايقاف مؤقت للنظام</button> <button class="btn btn-r" onclick="if(confirm('تحذير: سيتم حذف جميع البيانات!'))destroySys()">التدمير الذاتي</button> </div> </div> <div class="card"><div class="card-lbl">تغيير رتبة</div> <div style="margin-top:11px"> <div class="fg"><label class="fl">المستخدم</label><select class="fi" id="rkUser"></select></div> <div class="fg"><label class="fl">الرتبة الجديدة</label><select class="fi" id="rkNew"></select></div> <button class="btn btn-sm btn-r" style="margin-top:7px" onclick="changeRk()">تغيير</button> </div> </div> </div> <div class="card"><div class="card-lbl">طلبات معلقة</div><div id="pendingAdm" style="margin-top:11px"></div></div> </div>
+</div></div></div>
 
 <script src="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Cesium.js"></script>
 <link href="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-
 <script>
 // CONFIG
 const BIN_ID='69a43087d0ea881f40e496b9';
 const API_KEY='$2a$10$93c0tuClQrgOGH8RN2Vzpu5.41bCcqF3KEYPAcj5KeeTMo0q266bu';
 const BIN_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
-
 // RANKS
 const RANKS=['القائد الاعلى','فريق اول','فريق','لواء','عميد','عقيد','مقدم','رائد','نقيب','ملازم اول','ملازم','رئيس رقباء','رقيب اول','رقيب','وكيل رقيب','عريف','جندي اول','جندي'];
 const RL={};RANKS.forEach((r,i)=>RL[r]=RANKS.length-1-i);
@@ -433,11 +262,306 @@ const canApp=r=>RL[r]>=RL['ملازم'];
 const canViol=r=>RL[r]>=RL['نقيب'];
 const canSec=r=>RL[r]>=RL['عقيد'];
 const canInt=r=>RL[r]>=RL['ملازم'];
-
 let state={users:[],messages:[],requests:[],documents:[],violations:[],commandLog:[],systemPaused:false,loginLogs:[],lawsVersion:1,laws:''};
-let cu=null,ccu=null,cesiumV=null,mapInit=false,aiHist=[],syncing=false,syncIv=null;
+let cu=null,ccu=null,cesiumV=null,mapInit=false,gmInit=false,gmViewer=null,aiHist=[],syncing=false,syncIv=null;
 
-// DB
+// ============ GLOBAL MONITOR DATA ============
+const GM_NEWS = [
+  {id:1,cat:'missile',catLabel:'إطلاق صاروخي',title:'كوريا الشمالية تطلق صاروخاً باليستياً عابراً للقارات',body:'أطلقت كوريا الشمالية صاروخاً باليستياً عابراً للقارات سقط في المنطقة الاقتصادية الخالصة لليابان. استغرقت الرحلة 66 دقيقة وبلغ ارتفاعه الأقصى 6200 كم. اليابان أصدرت تحذيرات طارئة وأمريكا استدعت سفير بيونغ يانغ.',source:'NEXUS INTEL',region:'شمال شرق آسيا',time:'قبل 12 د',coords:{lat:38.9,lng:127.5},tags:['كوريا الشمالية','صاروخ باليستي','اليابان','تصعيد']},
+  {id:2,cat:'war',catLabel:'نزاع مسلح',title:'اشتباكات عنيفة على الحدود الروسية الأوكرانية',body:'تواصل الاشتباكات على محور زاباروجيا. القوات الأوكرانية أحبطت هجوماً مدرعاً روسياً بدعم من مسيّرات FPV. الجانب الروسي أفاد بخسائر أوكرانية. معهد دراسة الحرب رصد تحركات كبيرة في خط القتال.',source:'WAR MONITOR',region:'أوروبا الشرقية',time:'قبل 25 د',coords:{lat:47.8,lng:35.2},tags:['أوكرانيا','روسيا','زاباروجيا','مسيّرات']},
+  {id:3,cat:'diplo',catLabel:'دبلوماسي',title:'قمة طارئة بين قادة مجموعة السبع حول الملف النووي الإيراني',body:'انعقدت قمة افتراضية طارئة لقادة مجموعة السبع ناقشت التطورات النووية الإيرانية. الوكالة الدولية للطاقة الذرية أشارت إلى تخصيب اليورانيوم بنسبة 84%. أمريكا هددت بخيارات عسكرية.',source:'DIPLOMATIC WIRE',region:'الشرق الأوسط',time:'قبل 44 د',coords:{lat:35.7,lng:51.4},tags:['إيران','نووي','مجموعة السبع','دبلوماسية']},
+  {id:4,cat:'intel',catLabel:'استخبارات',title:'تقرير: تعزيزات عسكرية صينية قرب مضيق تايوان',body:'صور الأقمار الاصطناعية تُظهر تحركات بحرية وجوية صينية واسعة. 47 طائرة حربية صينية اخترقت منطقة الدفاع الجوي التايوانية. أمريكا أرسلت حاملة طائرات USS رونالد ريغان.',source:'SAT INTEL',region:'الجناح الهادئ',time:'قبل 1 س',coords:{lat:24.1,lng:120.9},tags:['الصين','تايوان','مضيق تايوان','البحرية']},
+  {id:5,cat:'missile',catLabel:'ضربة صاروخية',title:'ضربات صاروخية في منطقة الشرق الأوسط',body:'تقارير عن ضربات صاروخية طالت عدة مواقع في المنطقة. منظومات الدفاع الجوي تصدّت لعدد منها. لا إحصائيات نهائية بعد للخسائر.',source:'REGIONAL MONITOR',region:'الشرق الأوسط',time:'قبل 2 س',coords:{lat:31.5,lng:34.8},tags:['صواريخ','دفاع جوي','شرق أوسط']},
+  {id:6,cat:'diplo',catLabel:'تصريح رسمي',title:'الناتو يُعلن رفع مستوى الاستعداد إلى DEFCON 3',body:'الأمين العام للناتو أعلن عن رفع مستوى التأهب العسكري. القرار جاء عقب سلسلة من الحوادث على الجناح الشرقي. القوات الأمريكية في أوروبا انتقلت إلى حالة تأهب قصوى.',source:'NATO BULLETIN',region:'أوروبا',time:'قبل 3 س',coords:{lat:50.8,lng:4.3},tags:['الناتو','تأهب','أوروبا']},
+  {id:7,cat:'intel',catLabel:'استخبارات',title:'رصد تحركات لغواصة نووية روسية في المحيط الأطلسي',body:'سفن حربية أمريكية وبريطانية تتتبع غواصة نووية روسية من فئة يوري دولغوروكي في المحيط الأطلسي. المناورة تزامنت مع تصريحات روسية حادة.',source:'NAVAL INTEL',region:'الأطلسي الشمالي',time:'قبل 4 س',coords:{lat:52.0,lng:-30.0},tags:['روسيا','غواصة','نووي','الأطلسي']},
+  {id:8,cat:'nuclear',catLabel:'⚠ نووي',title:'إيران ترفع مستوى التخصيب إلى 90%',body:'مفتشو الوكالة الدولية للطاقة الذرية أكدوا الرفع إلى 90%. هذا المستوى يُعد عتبة الاستخدام العسكري. الولايات المتحدة تجمّد المفاوضات. اسرائيل تستدعي مجلس الأمن القومي.',source:'IAEA REPORT',region:'الشرق الأوسط',time:'قبل 5 س',coords:{lat:32.4,lng:53.7},tags:['إيران','نووي','تخصيب','أزمة']},
+];
+
+const GM_CONFLICTS = [
+  {name:'أوكرانيا - روسيا',flag:'🇺🇦',status:'قتال نشط - محور زاباروجيا',intensity:'active'},
+  {name:'غزة - فلسطين',flag:'🇵🇸',status:'عمليات مستمرة',intensity:'active'},
+  {name:'مضيق تايوان',flag:'🇹🇼',status:'توترات عسكرية متصاعدة',intensity:'active'},
+  {name:'السودان',flag:'🇸🇩',status:'اشتباكات داخلية',intensity:'active'},
+  {name:'بحر الصين الجنوبي',flag:'🇵🇭',status:'احتكاكات بحرية متكررة',intensity:'tense'},
+  {name:'كشمير',flag:'🇮🇳',status:'مراقبة مكثفة',intensity:'tense'},
+  {name:'الساحل الأفريقي',flag:'🌍',status:'نشاط جماعات مسلحة',intensity:'monitor'},
+];
+
+const GM_ALERTS = [
+  {text:'⚡ إيران ترفع التخصيب النووي إلى 90% - الوكالة الدولية تؤكد',level:'red'},
+  {text:'🚀 إطلاق صاروخي من كوريا الشمالية - تحذير الملاحة الجوية نافذ',level:'red'},
+  {text:'⚠ رصد 47 طائرة صينية تخترق المنطقة الجوية التايوانية',level:'amber'},
+  {text:'📡 الناتو يرفع مستوى التأهب - DEFCON 3 نافذ',level:'amber'},
+];
+
+const GM_TICKER_ITEMS = [
+  'إيران تُعلن عن صاروخ جديد يصل 2000 كم',
+  'قمة بايدن-بوتين الافتراضية تنتهي دون تقدم',
+  'البنتاغون يعلن تعزيز قواته في المحيط الهادئ',
+  'روسيا تُجري تجربة لصاروخ سارمات النووي',
+  'الصين تعلن مناورات بحرية شاملة قرب تايوان',
+  'وكالة: اغتيال قائد عسكري رفيع في منطقة الشرق الأوسط',
+  'اتفاقية وقف إطلاق النار في السودان تنهار',
+  'كوريا الجنوبية وأمريكا تبدآن تدريبات نووية مشتركة',
+  'الأمم المتحدة تعقد جلسة طارئة حول الملف الإيراني',
+  'إسرائيل: سنضرب المفاعلات النووية الإيرانية إذا تجاوزت الخط الأحمر',
+];
+
+const GM_WORLD_STATS = [
+  {label:'نزاعات مسلحة نشطة',val:'27',color:'red'},
+  {label:'قوات في حالة تأهب',val:'1.4M',color:'amber'},
+  {label:'صواريخ أُطلقت (30 يوم)',val:'847',color:'red'},
+  {label:'بعثات سلام أممية',val:'12',color:'green'},
+  {label:'تحذيرات هجوم إلكتروني',val:'3',color:'amber'},
+];
+
+let gmMapInitialized = false;
+let gmRefreshInterval = null;
+
+function renderGlobalMonitor() {
+  // حماية: عقيد فما فوق فقط
+  if(!canSec(cu.rank)&&!isCmd(cu.rank)){
+    document.getElementById('panel-globalmonitor').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:80vh;flex-direction:column;gap:16px"><div style="font-family:var(--font-vt);font-size:28px;color:var(--red);letter-spacing:6px">وصول مرفوض</div><div style="font-size:11px;color:#333;letter-spacing:3px">هذا القسم حكر على رتبة عقيد فما فوق</div><div style="font-size:10px;color:#1a2a1a;letter-spacing:2px">CLEARANCE REQUIRED: COLONEL+</div></div>`;
+    return;
+  }
+  // Alerts
+  document.getElementById('gmAlerts').innerHTML = GM_ALERTS.map(a =>
+    `<div class="alert-ticker ${a.level==='amber'?'amber':''}" onclick="void(0)">${a.text}</div>`
+  ).join('');
+
+  // News Feed
+  document.getElementById('gmNewsFeed').innerHTML = GM_NEWS.map(n =>
+    `<div class="news-item" onclick="openNewsDetail(${n.id})">
+      <span class="news-cat cat-${n.cat}">${n.catLabel}</span>
+      <div class="news-title">${n.title}</div>
+      <div class="news-meta">
+        <span class="news-time">⏱ ${n.time}</span>
+        <span class="news-source">📡 ${n.source}</span>
+        <span style="color:#1a3a2a">📍 ${n.region}</span>
+      </div>
+    </div>`
+  ).join('');
+
+  // Ticker
+  const tickerItems = [...GM_TICKER_ITEMS, ...GM_TICKER_ITEMS];
+  document.getElementById('gmTicker').innerHTML = tickerItems.map(t =>
+    `<div class="ticker-item"><span>▶</span>${t}</div>`
+  ).join('');
+
+  // Threat Level
+  document.getElementById('gmThreatLevel').innerHTML = `
+    <div style="margin-bottom:8px">
+      <div style="font-size:9px;color:#333;letter-spacing:2px;margin-bottom:3px">المستوى العالمي</div>
+      <div style="font-family:var(--font-vt);font-size:28px;color:var(--red)">حرج - CRITICAL</div>
+      <div class="threat-bar"><div class="threat-fill threat-critical" style="width:88%"></div></div>
+      <div style="font-size:9px;color:#333;margin-top:3px">88 / 100</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px">
+      <div><div style="font-size:9px;color:#333">أوروبا</div><div class="threat-bar"><div class="threat-fill threat-critical" style="width:92%"></div></div></div>
+      <div><div style="font-size:9px;color:#333">آسيا</div><div class="threat-bar"><div class="threat-fill threat-high" style="width:78%"></div></div></div>
+      <div><div style="font-size:9px;color:#333">الشرق الأوسط</div><div class="threat-bar"><div class="threat-fill threat-critical" style="width:95%"></div></div></div>
+      <div><div style="font-size:9px;color:#333">أمريكا</div><div class="threat-bar"><div class="threat-fill threat-med" style="width:45%"></div></div></div>
+    </div>`;
+
+  // Conflicts
+  document.getElementById('gmConflicts').innerHTML = GM_CONFLICTS.map(c =>
+    `<div class="conflict-item">
+      <div class="conflict-flag">${c.flag}</div>
+      <div style="flex:1">
+        <div class="conflict-name">${c.name}</div>
+        <div class="conflict-status">${c.status}</div>
+      </div>
+      <span class="conflict-intensity intensity-${c.intensity}">${c.intensity==='active'?'نشط':c.intensity==='tense'?'متوتر':'مراقبة'}</span>
+    </div>`
+  ).join('');
+
+  // World Stats
+  document.getElementById('gmWorldStats').innerHTML = GM_WORLD_STATS.map(s =>
+    `<div class="stat-row">
+      <span class="stat-label">${s.label}</span>
+      <span class="stat-val ${s.color==='red'?'red':s.color==='amber'?'amber':''}">${s.val}</span>
+    </div>`
+  ).join('');
+
+  // Member Tracking
+  renderMemberTracking();
+
+  // Map overlay stats
+  document.getElementById('gm-online').textContent = state.users.filter(u=>u.isOnline).length;
+  document.getElementById('gm-points').textContent = GM_NEWS.length;
+  document.getElementById('gm-threats').textContent = GM_ALERTS.filter(a=>a.level==='red').length;
+  document.getElementById('gm-update').textContent = new Date().toLocaleTimeString('ar');
+  document.getElementById('gmLastRefresh').textContent = new Date().toLocaleTimeString('ar');
+
+  // Init map once
+  if (!gmMapInitialized) {
+    initGlobalMonitorMap();
+    gmMapInitialized = true;
+  }
+
+  // Start refresh
+  if (!gmRefreshInterval) {
+    gmRefreshInterval = setInterval(() => {
+      document.getElementById('gm-update').textContent = new Date().toLocaleTimeString('ar');
+      document.getElementById('gmLastRefresh').textContent = new Date().toLocaleTimeString('ar');
+      document.getElementById('gm-online').textContent = state.users.filter(u=>u.isOnline).length;
+      renderMemberTracking();
+    }, 10000);
+  }
+}
+
+function renderMemberTracking() {
+  const members = state.users.slice(0, 10);
+  document.getElementById('gmMemberTrack').innerHTML = members.length === 0
+    ? '<div style="color:#111;font-size:10px">لا يوجد اعضاء</div>'
+    : members.map(u => {
+        const lastAct = state.loginLogs.filter(l=>l.user===u.username).slice(-1)[0];
+        const actTime = lastAct ? new Date(lastAct.time).toLocaleTimeString('ar') : '---';
+        return `<div class="member-track-item">
+          <div class="mt-avatar">${u.username.charAt(0).toUpperCase()}</div>
+          <div style="flex:1">
+            <div class="mt-name">${u.username}</div>
+            <div class="mt-rank">${u.rank}</div>
+            <div class="mt-activity">آخر نشاط: ${actTime}</div>
+          </div>
+          <span class="mt-status ${u.isOnline?'mt-online':'mt-offline'}">${u.isOnline?'متصل':'غير متصل'}</span>
+        </div>`;
+      }).join('');
+}
+
+function openNewsDetail(id) {
+  const n = GM_NEWS.find(x => x.id === id);
+  if (!n) return;
+  const catColors = {war:'var(--red)',missile:'var(--red)',diplo:'var(--amber)',intel:'var(--green-dim)',nuclear:'var(--red)'};
+  document.getElementById('ndbCat').innerHTML = `<span class="news-cat cat-${n.cat}">${n.catLabel}</span>`;
+  document.getElementById('ndbTitle').textContent = n.title;
+  document.getElementById('ndbMeta').innerHTML = `<span>⏱ ${n.time}</span><span>📡 ${n.source}</span><span>📍 ${n.region}</span>`;
+  document.getElementById('ndbBody').textContent = n.body;
+  document.getElementById('ndbTags').innerHTML = n.tags.map(t=>`<span class="ndb-tag">#${t}</span>`).join('');
+  document.getElementById('newsDetailOverlay').style.display = 'flex';
+  // Fly camera to event location
+  if (gmViewer && n.coords) {
+    try {
+      gmViewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(n.coords.lng, n.coords.lat, 3000000),
+        duration: 2
+      });
+    } catch(e){}
+  }
+}
+
+function closeNewsDetail() {
+  document.getElementById('newsDetailOverlay').style.display = 'none';
+}
+
+function initGlobalMonitorMap() {
+  if (typeof Cesium === 'undefined') {
+    document.getElementById('gmCesium').innerHTML = '<div style="color:var(--green-dim);padding:36px;text-align:center;font-size:12px">تعذر تحميل خريطة المراقبة. تحقق من الاتصال.</div>';
+    return;
+  }
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3ZTA5MWQ2Zi0yZGNhLTRkZGQtOTZlZC0yYmQyZmI2YmY0ZDIiLCJpZCI6Mzk1ODgxLCJpYXQiOjE3NzIyOTU4NDV9.SxUybsg_BRZNatuEJZHAF_FucdSKkSawv_4sZ3gESJI';
+  try {
+    gmViewer = new Cesium.Viewer('gmCesium', {
+      animation:false, timeline:false, baseLayerPicker:false,
+      geocoder:false, homeButton:false, sceneModePicker:false,
+      navigationHelpButton:false, fullscreenButton:false,
+      infoBox:false, selectionIndicator:false
+    });
+
+    gmViewer.scene.globe.baseColor = new Cesium.Color(0, 0.03, 0.05, 1);
+    gmViewer.scene.backgroundColor = Cesium.Color.BLACK;
+    gmViewer.scene.skyBox.show = false;
+    gmViewer.scene.sun.show = false;
+    gmViewer.scene.moon.show = false;
+
+    try {
+      const il = gmViewer.imageryLayers.get(0);
+      if (il) { il.hue = 0.6; il.saturation = 0.08; il.brightness = 0.25; }
+    } catch(e){}
+
+    // Add conflict/event markers from news data
+    GM_NEWS.forEach(n => {
+      if (!n.coords) return;
+      const colors = {
+        war: Cesium.Color.fromCssColorString('#ff0033'),
+        missile: Cesium.Color.fromCssColorString('#ff4400'),
+        diplo: Cesium.Color.fromCssColorString('#0088ff'),
+        intel: Cesium.Color.fromCssColorString('#00ff41'),
+        nuclear: Cesium.Color.fromCssColorString('#ff0033'),
+      };
+      const col = colors[n.cat] || Cesium.Color.WHITE;
+      gmViewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(n.coords.lng, n.coords.lat),
+        point: {
+          pixelSize: n.cat==='nuclear' ? 16 : n.cat==='missile' ? 14 : 10,
+          color: col.withAlpha(0.9),
+          outlineColor: col,
+          outlineWidth: 2
+        },
+        label: {
+          text: n.catLabel + '\n' + n.region,
+          font: '11px Share Tech Mono',
+          fillColor: col,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          showBackground: true,
+          backgroundColor: new Cesium.Color(0, 0, 0, 0.75),
+          pixelOffset: new Cesium.Cartesian2(0, -30),
+          show: false // show on hover
+        }
+      });
+    });
+
+    // Add member location markers - only show lower ranks
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const {longitude:lng, latitude:lat} = pos.coords;
+        gmViewer.entities.add({
+          position: Cesium.Cartesian3.fromDegrees(lng, lat),
+          point: { pixelSize: 13, color: Cesium.Color.fromCssColorString('#00ff41'), outlineColor: Cesium.Color.BLACK, outlineWidth: 2 },
+          label: {
+            text: (cu ? cu.username : 'موقعك') + '\n' + (cu ? cu.rank : '') + '\n[موقعي]',
+            font: '12px Share Tech Mono',
+            fillColor: Cesium.Color.fromCssColorString('#00ff41'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 2,
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            showBackground: true,
+            backgroundColor: new Cesium.Color(0, 0, 0, 0.7),
+            pixelOffset: new Cesium.Cartesian2(0, -35)
+          }
+        });
+        // إضافة مواقع الأعضاء من الرتب الأدنى فقط
+        const visibleUsers = state.users.filter(u =>
+          u.username !== (cu ? cu.username : '') &&
+          u.isOnline &&
+          RL[u.rank] < RL[cu ? cu.rank : 'جندي']
+        );
+        visibleUsers.forEach(u => {
+          const dLng = (Math.random()-0.5)*6;
+          const dLat = (Math.random()-0.5)*6;
+          gmViewer.entities.add({
+            position: Cesium.Cartesian3.fromDegrees(lng+dLng, lat+dLat),
+            point:{ pixelSize:10, color:Cesium.Color.fromCssColorString('#00aa28'), outlineColor:Cesium.Color.BLACK, outlineWidth:2},
+            label:{text:u.username+'\n'+u.rank, font:'11px Share Tech Mono', fillColor:Cesium.Color.fromCssColorString('#00aa28'), outlineColor:Cesium.Color.BLACK, outlineWidth:1, style:Cesium.LabelStyle.FILL_AND_OUTLINE, showBackground:true, backgroundColor:new Cesium.Color(0,0,0,0.7), pixelOffset:new Cesium.Cartesian2(0,-28)}
+          });
+        });
+      }, () => {});
+    }
+
+    // Fly to Middle East/world overview
+    gmViewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(30, 25, 18000000),
+      duration: 2
+    });
+
+  } catch(e) {
+    document.getElementById('gmCesium').innerHTML = `<div style="color:var(--green-dim);padding:36px;text-align:center;font-size:12px">خطا: ${e.message}</div>`;
+  }
+}
+
+// ============ ORIGINAL FUNCTIONS ============
 async function loadDB(){
   try{
     const r=await fetch(BIN_URL+'/latest',{headers:{'X-Master-Key':API_KEY,'X-Bin-Meta':'false'}});
@@ -454,7 +578,6 @@ async function saveDB(){
   syncing=false;
 }
 function setSI(s){const e=document.getElementById('syncInd');if(!e)return;e.className='sync-ind';if(s==='ok'){e.classList.add('s-ok');e.textContent='SYNC';}else if(s==='busy'){e.classList.add('s-busy');e.textContent='SYNC...';}else{e.classList.add('s-err');e.textContent='ERR';}}
-
 function startAutoSync(){
   if(syncIv)clearInterval(syncIv);
   syncIv=setInterval(async()=>{
@@ -464,17 +587,27 @@ function startAutoSync(){
     if(ap){const id=ap.id.replace('panel-','');if(['messages','users','requests'].includes(id))renderPanel(id);}
   },15000);
 }
-
-// AUTH
 async function doLogin(){
-  const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value;
-  if(!u||!p){showErr('loginErr','يرجى ادخال البيانات');return;}
-  showErr('loginErr','جاري التحقق...',true);
+  const u=document.getElementById('loginUser').value.trim();
+  const sym=document.getElementById('loginSym').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!sym||!p){showErr('loginErr',lang==='ar'?'يرجى ادخال الاسم والرمز والكود':'Please enter Name, Symbol and Code');return;}
+  showErr('loginErr',lang==='ar'?'جاري التحقق...':'Verifying...',true);
   await loadDB();
-  const user=state.users.find(x=>x.username===u&&x.password===p);
-  if(!user){showErr('loginErr','خطا في اسم المستخدم او كلمة المرور - ACCESS DENIED');return;}
-  if(!user.isActive){showErr('loginErr','الحساب موقوف - ACCOUNT SUSPENDED');return;}
-  if(state.systemPaused&&!isCmd(user.rank)){showErr('loginErr','النظام موقوف مؤقتا');return;}
+  // البحث: الاسم + الكود أساسيان. الرمز اختياري للحسابات القديمة
+  // للقائد الأعلى: يقبل الدخول بالاسم والكود فقط بدون رمز مطابق
+  const user=state.users.find(x=>{
+    if(x.username!==u) return false;
+    if(x.password!==p) return false;
+    // إذا الحساب عنده رمز محفوظ وهو مختلف عن المدخل - ارفض (إلا للقائد الأعلى)
+    if(x.symbol && x.symbol!==sym && x.rank!=='القائد الاعلى') return false;
+    return true;
+  });
+  if(!user){showErr('loginErr',lang==='ar'?'بيانات الدخول غير صحيحة - ACCESS DENIED':'Invalid credentials - ACCESS DENIED');return;}
+  if(!user.isActive){showErr('loginErr',lang==='ar'?'الحساب موقوف - ACCOUNT SUSPENDED':'Account suspended - ACCOUNT SUSPENDED');return;}
+  if(state.systemPaused&&!isCmd(user.rank)){showErr('loginErr',lang==='ar'?'النظام موقوف مؤقتا':'System temporarily paused');return;}
+  // حفظ الرمز إذا كان جديداً على الحساب
+  if(!user.symbol && sym){user.symbol=sym;}
   if(!user.lawsApproved||user.lawsVersion<state.lawsVersion){cu=user;document.getElementById('loginErr').style.display='none';document.getElementById('lawsModal').style.display='flex';return;}
   await completeLogin(user);
 }
@@ -484,26 +617,31 @@ async function completeLogin(user){
   await saveDB();
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('lawsModal').style.display='none';
-  document.getElementById('app').classList.add('active');
-  setupUI();showPanel('dashboard');startClock();startAutoSync();
+  // Show AI welcome overlay
+  showWelcome(user);
 }
 async function doLogout(){
   if(syncIv)clearInterval(syncIv);
+  if(gmRefreshInterval)clearInterval(gmRefreshInterval);
   if(cu){cu.isOnline=false;state.loginLogs.push({user:cu.username,action:'logout',time:new Date().toISOString()});await saveDB();}
   cu=null;document.getElementById('app').classList.remove('active');
   document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginSym').value='';
+  document.getElementById('loginPass').value='';
 }
 async function approveLaws(){
   if(!document.getElementById('lawsCheck').checked){alert('يجب الموافقة على القوانين اولا');return;}
   cu.lawsApproved=true;cu.lawsVersion=state.lawsVersion;await completeLogin(cu);
 }
-
-// UI
 function setupUI(){
   document.getElementById('tbUser').textContent=cu.username;
+  document.getElementById('tbSym').textContent='['+(cu.symbol||'---')+']';
   document.getElementById('tbRank').textContent=cu.rank;
   document.getElementById('adminSec').style.display=(canMgr(cu.rank)||isCmd(cu.rank))?'block':'none';
+  const gmNav=document.getElementById('nav-globalmonitor');
+  if(gmNav) gmNav.style.display=(canSec(cu.rank)||isCmd(cu.rank))?'flex':'none';
+  applyLang();
   popSelects();updateBadges();
 }
 function popSelects(){
@@ -537,11 +675,10 @@ function renderPanel(n){
     case 'documents':rdocs('all');break;case 'violations':rviols();break;
     case 'users':rusers();break;case 'commander':rcmd();break;
     case 'laws':rlaws();break;case 'map':initMap();break;
+    case 'globalmonitor':renderGlobalMonitor();break;
     case 'createaccount':rcreate();break;
   }
 }
-
-// DASHBOARD
 function rdash(){
   document.getElementById('dashDate').textContent=new Date().toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('st-u').textContent=state.users.filter(u=>u.isActive).length;
@@ -555,8 +692,6 @@ function rdash(){
   document.getElementById('myViolsD').innerHTML=state.violations.filter(v=>v.targetUser===cu.username).length>0?`<div class="alert al-r">لديك ${state.violations.filter(v=>v.targetUser===cu.username).length} مخالفة مسجلة.</div>`:'';
   document.getElementById('myReqsD').innerHTML=state.requests.filter(r=>r.from===cu.username&&r.status==='pending').length>0?`<div class="alert al-a">لديك ${state.requests.filter(r=>r.from===cu.username&&r.status==='pending').length} طلب قيد الانتظار.</div>`:'';
 }
-
-// STATS
 function rstats(){
   document.getElementById('sts-u').textContent=state.users.length;
   document.getElementById('sts-a').textContent=state.users.filter(u=>u.isActive).length;
@@ -565,8 +700,6 @@ function rstats(){
   const rc={};RANKS.forEach(r=>{rc[r]=0});state.users.forEach(u=>{rc[u.rank]=(rc[u.rank]||0)+1});
   document.getElementById('rkDetail').innerHTML=`<table class="tbl"><thead><tr><th>الرتبة</th><th>العدد</th><th>النسبة</th></tr></thead><tbody>${RANKS.filter(r=>rc[r]>0).map(r=>`<tr><td>${r}</td><td style="color:var(--green)">${rc[r]}</td><td><div class="prog" style="width:90px"><div class="pf" style="width:${(rc[r]/state.users.length*100).toFixed(0)}%"></div></div></td></tr>`).join('')}</tbody></table>`;
 }
-
-// MESSAGES
 function rmsgs(){popSelects();rinbox();rsent();}
 function rinbox(){
   const msgs=state.messages.filter(m=>m.to===cu.username);
@@ -607,8 +740,6 @@ async function sendNewMsg(){
   state.messages.push({id:'msg_'+Date.now(),from:cu.username,to,subject:subj,body,date:new Date().toISOString(),read:false});
   await saveDB();closeNewMsg();document.getElementById('msgSubj').value='';document.getElementById('msgBody').value='';updateBadges();alert('تم ارسال الرسالة بنجاح');
 }
-
-// AI
 const AI_SYS=`انت NEXUS AI، مساعد اداري ذكي لنظام القيادة العسكرية. تتحدث بالعربية الرسمية. انت مستشار فقط لا تصدر قرارات. القرار النهائي دائما بشري. لا تقدم تقارير او تحليلات اعضاء الا لرتبة عقيد فما فوق. ابدأ ردودك بـ [NEXUS AI]`;
 async function sendAI(){
   const input=document.getElementById('aiInput'),text=input.value.trim();if(!text)return;
@@ -631,8 +762,6 @@ async function sendAI(){
 }
 function addAI(role,text){const d=document.getElementById('aiMsgs');d.innerHTML+=`<div class="ai-msg ${role}"><div class="ai-tag">${role==='user'?cu.username:'NEXUS AI'}</div>${esc(text)}</div>`;d.scrollTop=99999;}
 function clearAI(){aiHist=[];document.getElementById('aiMsgs').innerHTML='<div class="ai-msg assistant"><div class="ai-tag">NEXUS AI</div>تم مسح المحادثة. كيف يمكنني مساعدتك؟</div>';}
-
-// REQUESTS
 function rreqs(){rmreqs();if(canApp(cu.rank)){document.getElementById('incTab').style.display='block';rireqs();}}
 function rmreqs(){
   const mine=state.requests.filter(r=>r.from===cu.username);
@@ -664,8 +793,6 @@ async function submitReq(){
 }
 const rtn=t=>({'leave':'طلب اجازة','promotion':'طلب ترقية','transfer':'طلب نقل','permission':'طلب صلاحية مؤقتة','clarification':'طلب توضيح اداري'}[t]||t);
 const stn=s=>({'pending':'قيد الانتظار','approved':'مقبول','rejected':'مرفوض'}[s]||s);
-
-// DOCUMENTS
 let curDT='all';
 function rdocs(tab){
   curDT=tab;
@@ -693,8 +820,6 @@ async function submitDoc(){
   state.documents.push({id:'doc_'+Date.now(),title,class:cl,content,minRank,addedBy:cu.username,date:new Date().toISOString(),accessLog:[]});
   await saveDB();closeAddDoc();document.getElementById('docTitle').value='';document.getElementById('docContent').value='';rdocs(curDT);alert('تم حفظ المستند');
 }
-
-// VIOLATIONS
 function rviols(){
   const canAdd=canViol(cu.rank),canAll=canMgr(cu.rank)||isCmd(cu.rank);
   document.getElementById('addViolBtn').style.display=canAdd?'block':'none';
@@ -711,8 +836,6 @@ async function submitViol(){
   state.violations.push({id:'viol_'+Date.now(),targetUser:tu,type,severity:sev,details:det,reportedBy:cu.username,date:new Date().toISOString()});
   await saveDB();closeAddViol();document.getElementById('violDet').value='';rviols();
 }
-
-// USERS
 function rusers(){
   document.getElementById('onlineChips').innerHTML=state.users.map(u=>`<div class="chip"><div class="dot ${u.isOnline?'dg':'dr'}"></div><span style="color:${u.isOnline?'var(--green)':'#222'}">${u.username}</span><span style="font-size:9px;color:#333">${u.rank}</span></div>`).join('');
   document.getElementById('usersTb').innerHTML=state.users.map(u=>`<tr><td style="color:var(--green)">${u.username}</td><td><span class="rk ${rkc(u.rank)}">${u.rank}</span></td><td><span class="dot ${u.isOnline?'dg':'dr'}"></span>${u.isActive?'نشط':'موقوف'}</td><td style="color:#222">${u.lastLogin?new Date(u.lastLogin).toLocaleDateString('ar'):'---'}</td><td>${(isCmd(cu.rank)||canMgr(cu.rank))?`${u.isActive?`<button class="btn btn-xs btn-r" onclick="togUser('${u.id}',false)">تعطيل</button>`:`<button class="btn btn-xs glow" onclick="togUser('${u.id}',true)">تفعيل</button>`}${isCmd(cu.rank)&&u.username!==cu.username?` <button class="btn btn-xs btn-r" onclick="delUser('${u.id}')">حذف</button>`:''}`:''}</td></tr>`).join('');
@@ -730,8 +853,6 @@ async function delUser(id){
   state.users=state.users.filter(u=>u.id!==id);await saveDB();rusers();
 }
 const rkc=r=>r==='القائد الاعلى'?'rk-s':RL[r]>=RL['لواء']?'rk-h':RL[r]>=RL['ملازم']?'rk-m':'rk-l';
-
-// COMMANDER
 function rcmd(){
   popSelects();
   document.getElementById('cmdLog').innerHTML=state.commandLog.slice().reverse().slice(0,20).map(l=>`<div><span style="color:var(--red)">[${new Date(l.date).toLocaleString('ar')}]</span> ${l.action}</div>`).join('')||'<div style="color:#111">لا يوجد سجل</div>';
@@ -765,8 +886,6 @@ async function destroySys(){
   await saveDB();document.getElementById('sysMsg').textContent='تم ايقاف النظام باوامر القائد الاعلى';
   document.getElementById('sysOverlay').classList.add('active');setTimeout(()=>location.reload(),4000);
 }
-
-// LAWS
 function rlaws(){
   document.getElementById('editLawsBtn').style.display=isCmd(cu.rank)?'block':'none';
   document.getElementById('lawsContent').innerHTML=`<div class="card"><div class="card-lbl">القوانين الداخلية</div><div style="margin-top:13px;font-size:12px;color:#555;line-height:2.5;white-space:pre-line">${state.laws}</div></div>`;
@@ -775,24 +894,28 @@ async function editLaws(){
   const nl=prompt('تعديل القوانين:',state.laws);
   if(nl!==null){state.laws=nl;state.commandLog.push({action:'تعديل القوانين',date:new Date().toISOString()});await saveDB();rlaws();}
 }
-
-// CREATE ACCOUNT
 function rcreate(){popSelects();document.getElementById('newAccErr').style.display='none';document.getElementById('newAccSuc').style.display='none';}
 async function createAcc(){
-  const u=document.getElementById('newAccUser').value.trim(),p=document.getElementById('newAccPass').value,rk=document.getElementById('newAccRk').value;
+  const u=document.getElementById('newAccUser').value.trim();
+  const sym=document.getElementById('newAccSym').value.trim();
+  const p=document.getElementById('newAccPass').value;
+  const rk=document.getElementById('newAccRk').value;
   const ee=document.getElementById('newAccErr'),se=document.getElementById('newAccSuc');
   ee.style.display='none';se.style.display='none';
-  if(!u||u.length<3){ee.style.display='block';ee.textContent='اسم المستخدم قصير جدا (3 احرف على الاقل)';return;}
-  if(!p||p.length<6){ee.style.display='block';ee.textContent='كلمة المرور اقل من 6 احرف';return;}
-  if(state.users.find(x=>x.username===u)){ee.style.display='block';ee.textContent='اسم المستخدم موجود مسبقا';return;}
-  if(!isCmd(cu.rank)&&RL[rk]>=RL[cu.rank]){ee.style.display='block';ee.textContent='لا يمكنك انشاء حساب برتبة اعلى من رتبتك';return;}
-  state.users.push({id:'user_'+Date.now(),username:u,password:p,rank:rk,isActive:true,isOnline:false,createdAt:new Date().toISOString(),lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]});
-  if(isCmd(cu.rank))state.commandLog.push({action:`انشاء حساب: ${u} - ${rk}`,date:new Date().toISOString()});
-  await saveDB();se.style.display='block';se.textContent=`تم انشاء حساب "${u}" برتبة "${rk}" بنجاح`;
-  document.getElementById('newAccUser').value='';document.getElementById('newAccPass').value='';popSelects();
+  if(!u||u.length<3){ee.style.display='block';ee.textContent='Name too short (min 3 chars)';return;}
+  if(!sym||sym.length<2){ee.style.display='block';ee.textContent='Symbol too short (min 2 chars)';return;}
+  if(!p||p.length<6){ee.style.display='block';ee.textContent='Code must be at least 6 characters';return;}
+  if(state.users.find(x=>x.username===u)){ee.style.display='block';ee.textContent='Username already exists';return;}
+  if(state.users.find(x=>x.symbol===sym)){ee.style.display='block';ee.textContent='Symbol already in use';return;}
+  if(!isCmd(cu.rank)&&RL[rk]>=RL[cu.rank]){ee.style.display='block';ee.textContent='Cannot create account with equal or higher rank';return;}
+  state.users.push({id:'user_'+Date.now(),username:u,symbol:sym,password:p,rank:rk,isActive:true,isOnline:false,createdAt:new Date().toISOString(),lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]});
+  if(isCmd(cu.rank))state.commandLog.push({action:`انشاء حساب: ${u} [${sym}] - ${rk}`,date:new Date().toISOString()});
+  await saveDB();se.style.display='block';se.textContent=`Account "${u}" [${sym}] created — Rank: ${rk}`;
+  document.getElementById('newAccUser').value='';
+  document.getElementById('newAccSym').value='';
+  document.getElementById('newAccPass').value='';
+  popSelects();
 }
-
-// MAP
 function initMap(){
   if(mapInit)return;mapInit=true;
   if(typeof Cesium==='undefined'){document.getElementById('cesiumContainer').innerHTML='<div style="color:var(--green-dim);padding:36px;text-align:center;font-size:12px">تعذر تحميل مكتبة الخريطة. تحقق من الاتصال.</div>';return;}
@@ -807,19 +930,160 @@ function initMap(){
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(pos=>{
         const lng=pos.coords.longitude,lat=pos.coords.latitude;
-        cesiumV.entities.add({position:Cesium.Cartesian3.fromDegrees(lng,lat),point:{pixelSize:13,color:Cesium.Color.fromCssColorString('#00ff41'),outlineColor:Cesium.Color.BLACK,outlineWidth:2},label:{text:cu?cu.username+'\n'+cu.rank:'موقعي',font:'13px Share Tech Mono',fillColor:Cesium.Color.fromCssColorString('#00ff41'),outlineColor:Cesium.Color.BLACK,outlineWidth:2,style:Cesium.LabelStyle.FILL_AND_OUTLINE,showBackground:true,backgroundColor:new Cesium.Color(0,0,0,0.7),pixelOffset:new Cesium.Cartesian2(0,-35)}});
+        // حفظ موقع المستخدم الحالي في الحالة مؤقتاً
+        cu._lng=lng; cu._lat=lat;
+        cesiumV.entities.add({position:Cesium.Cartesian3.fromDegrees(lng,lat),point:{pixelSize:13,color:Cesium.Color.fromCssColorString('#00ff41'),outlineColor:Cesium.Color.BLACK,outlineWidth:2},label:{text:cu.username+'\n'+cu.rank+'\n[موقعي]',font:'13px Share Tech Mono',fillColor:Cesium.Color.fromCssColorString('#00ff41'),outlineColor:Cesium.Color.BLACK,outlineWidth:2,style:Cesium.LabelStyle.FILL_AND_OUTLINE,showBackground:true,backgroundColor:new Cesium.Color(0,0,0,0.7),pixelOffset:new Cesium.Cartesian2(0,-35)}});
+        // إضافة نقاط الأعضاء الذين رتبتهم أدنى من رتبة المستخدم الحالي فقط
+        // نحاكي مواقع الأعضاء (في حالة حقيقية يجب تخزينها في DB)
+        const visibleUsers = state.users.filter(u =>
+          u.username !== cu.username &&
+          u.isOnline &&
+          RL[u.rank] < RL[cu.rank]  // أدنى رتبة فقط
+        );
+        visibleUsers.forEach((u, i) => {
+          // موقع تقريبي محاكى حول موقع المستخدم الحالي (بدون GPS حقيقي للأعضاء)
+          const dLng = (Math.random()-0.5)*4;
+          const dLat = (Math.random()-0.5)*4;
+          cesiumV.entities.add({
+            position:Cesium.Cartesian3.fromDegrees(lng+dLng, lat+dLat),
+            point:{pixelSize:10,color:Cesium.Color.fromCssColorString('#00aa28'),outlineColor:Cesium.Color.BLACK,outlineWidth:2},
+            label:{text:u.username+'\n'+u.rank,font:'11px Share Tech Mono',fillColor:Cesium.Color.fromCssColorString('#00aa28'),outlineColor:Cesium.Color.BLACK,outlineWidth:1,style:Cesium.LabelStyle.FILL_AND_OUTLINE,showBackground:true,backgroundColor:new Cesium.Color(0,0,0,0.7),pixelOffset:new Cesium.Cartesian2(0,-28)}
+          });
+        });
         cesiumV.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(lng,lat,1500000),duration:2});
       },fly);
     }else fly();
   }catch(e){document.getElementById('cesiumContainer').innerHTML=`<div style="color:var(--green-dim);padding:36px;text-align:center;font-size:12px">خطا: ${e.message}<br><button class="btn btn-sm" style="margin-top:12px" onclick="mapInit=false;initMap()">اعادة</button></div>`;}
 }
-
-// UTILS
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showErr(id,msg,info=false){const e=document.getElementById(id);if(e){e.style.display='block';e.style.color=info?'var(--amber)':'var(--red)';e.textContent=msg;}}
 function startClock(){setInterval(()=>{const e=document.getElementById('tbTime');if(e)e.textContent=new Date().toLocaleTimeString('ar');},1000);}
 
-// INIT
+// ============ LANGUAGE SYSTEM ============
+let lang = 'ar';
+const T = {
+  ar: {logout:'خروج',hold:'اضغط مطولاً للمصادقة',scanning:'جاري المسح...',verified:'تم التحقق ✓'},
+  en: {logout:'LOGOUT',hold:'HOLD TO AUTHENTICATE',scanning:'SCANNING...',verified:'VERIFIED ✓'}
+};
+function setLang(l){
+  lang=l;
+  document.getElementById('langAR').classList.toggle('active',l==='ar');
+  document.getElementById('langEN').classList.toggle('active',l==='en');
+  document.documentElement.dir=l==='ar'?'rtl':'ltr';
+  document.documentElement.lang=l;
+  document.getElementById('loginSub').textContent=l==='ar'?'نظام القيادة العسكري الآمن':'SECURE MILITARY COMMAND SYSTEM';
+  document.getElementById('lbl-name').textContent=l==='ar'?'الاسم — NAME':'NAME — الاسم';
+  document.getElementById('lbl-sym').textContent=l==='ar'?'الرمز — SYMBOL':'SYMBOL — الرمز';
+  document.getElementById('lbl-code').textContent=l==='ar'?'الكود — ACCESS CODE':'ACCESS CODE — الكود';
+  document.getElementById('bioLabel').textContent=T[l].hold;
+}
+function toggleLang(){setLang(lang==='ar'?'en':'ar');}
+function applyLang(){
+  const q=id=>document.getElementById(id);
+  if(q('logoutBtn'))q('logoutBtn').textContent=T[lang].logout;
+  if(q('topLangBtn'))q('topLangBtn').textContent=lang==='ar'?'EN':'AR';
+}
+
+// ============ BIOMETRIC HANDLER ============
+let bioInterval=null, bioHolding=false;
+function startBio(e){
+  e.preventDefault();
+  const u=document.getElementById('loginUser').value.trim();
+  const sym=document.getElementById('loginSym').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!sym||!p){showErr('loginErr',lang==='ar'?'يرجى ملء الاسم والرمز والكود أولاً':'Please fill Name, Symbol and Code first');return;}
+  bioHolding=true;
+  const btn=document.getElementById('bioBtn');
+  const progressEl=document.getElementById('bioProgress');
+  const label=document.getElementById('bioLabel');
+  btn.classList.add('pressing');
+  label.textContent=T[lang].scanning;
+  const dur=5000+Math.random()*2000;
+  const step=80;
+  const totalSteps=dur/step;
+  let currentStep=0;
+  const circumference=240;
+  clearInterval(bioInterval);
+  bioInterval=setInterval(()=>{
+    if(!bioHolding){clearInterval(bioInterval);return;}
+    currentStep++;
+    const offset=circumference-((currentStep/totalSteps)*circumference);
+    progressEl.setAttribute('stroke-dashoffset',Math.max(0,offset));
+    if(currentStep>=totalSteps){
+      clearInterval(bioInterval);
+      btn.classList.remove('pressing');
+      label.textContent=T[lang].verified;
+      progressEl.setAttribute('stroke-dashoffset','0');
+      setTimeout(()=>doLogin(),300);
+    }
+  },step);
+}
+function cancelBio(){
+  if(!bioHolding)return;
+  bioHolding=false;
+  clearInterval(bioInterval);
+  const btn=document.getElementById('bioBtn');
+  const progressEl=document.getElementById('bioProgress');
+  btn.classList.remove('pressing');
+  document.getElementById('bioLabel').textContent=T[lang].hold;
+  progressEl.style.transition='stroke-dashoffset 0.5s ease';
+  progressEl.setAttribute('stroke-dashoffset','240');
+  setTimeout(()=>progressEl.style.transition='none',600);
+}
+
+// ============ WELCOME OVERLAY ============
+function showWelcome(user){
+  const ov=document.getElementById('welcomeOverlay');
+  const msg=document.getElementById('woMsg');
+  const sub=document.getElementById('woSub');
+  ov.classList.add('active');
+  const bar=document.getElementById('woBar');
+  bar.style.animation='none';
+  void bar.offsetWidth;
+  bar.style.animation='wo-prog 4s linear forwards';
+  const nameHtml=`<span style="color:var(--amber)">${user.username}</span><br><span style="font-size:18px;color:#444">[${user.symbol}]</span><br><span style="font-size:16px;color:var(--green-dim)">${user.rank}</span>`;
+  msg.innerHTML=lang==='ar'?`مرحباً، ${nameHtml}`:`Welcome, ${nameHtml}`;
+  sub.textContent=lang==='ar'?'الهوية مؤكدة — تم منح الوصول':'IDENTITY CONFIRMED — ACCESS GRANTED';
+  generateAIWelcome(user).then(aiMsg=>{
+    msg.innerHTML=`<span style="font-size:11px;color:var(--amber);letter-spacing:3px;display:block;margin-bottom:10px">▶ NEXUS AI</span>${aiMsg}`;
+  });
+  setTimeout(()=>{
+    ov.classList.remove('active');
+    document.getElementById('app').classList.add('active');
+    setupUI();showPanel('dashboard');startClock();startAutoSync();
+  },4000);
+}
+async function generateAIWelcome(user){
+  try{
+    const prompt=lang==='ar'
+      ?`أنت NEXUS AI. قل مرحباً بالعميل "${user.username}" برمز "${user.symbol}" ورتبة "${user.rank}". جملة واحدة رسمية عسكرية موجزة باللغة العربية لا تتجاوز 18 كلمة.`
+      :`You are NEXUS AI. Welcome operative "${user.username}" symbol "${user.symbol}" rank "${user.rank}" to NEXUS COMMAND. One formal military sentence, max 12 words.`;
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:80,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    return data.content?.[0]?.text||(lang==='ar'?`مرحباً ${user.username}، تم التحقق من هويتك.`:`Welcome ${user.username}, identity verified.`);
+  }catch(e){
+    return lang==='ar'?`مرحباً ${user.username} [${user.symbol}]، رتبة ${user.rank}. تم تأكيد هويتك في نظام NEXUS.`:`Welcome ${user.username} [${user.symbol}], ${user.rank}. Identity verified in NEXUS COMMAND.`;
+  }
+}
+
+// ============ PRESET ACCOUNTS ============
+const PRESET_ACCOUNTS=[
+  {id:'preset_1',username:'Aegis-07',symbol:'AX-1LT',password:'A7!gS#19vQx',rank:'ملازم اول',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+  {id:'preset_2',username:'Specter-19',symbol:'SP-1LT',password:'Sp9$Tr!42kLm',rank:'ملازم اول',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+  {id:'preset_3',username:'Vanguard-31',symbol:'VG-1LT',password:'Vg3@R#71xPd',rank:'ملازم اول',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+  {id:'preset_4',username:'Cipher-42',symbol:'CF-1LT',password:'C4!phR$88zT',rank:'ملازم اول',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+  {id:'preset_5',username:'Black Regent',symbol:'BRG-06',password:'Bl@ckR#903!Q',rank:'عميد',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+  {id:'preset_6',username:'High Marshal',symbol:'HM-GEN',password:'H1ghM@r$741X',rank:'فريق',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+  {id:'preset_7',username:'Supreme Overlord',symbol:'CINC-X',password:'SuP#999!DomX',rank:'القائد الاعلى',isActive:true,isOnline:false,createdAt:'2025-01-01T00:00:00.000Z',lastLogin:null,lawsApproved:false,lawsVersion:0,violations:[]},
+];
+async function injectPresetAccounts(){
+  let changed=false;
+  for(const pa of PRESET_ACCOUNTS){
+    if(!state.users.find(u=>u.username===pa.username)){state.users.push(pa);changed=true;}
+  }
+  if(changed)await saveDB();
+}
+
 (async()=>{
   const ok=await loadDB();
   document.getElementById('loadingScreen').style.display='none';
@@ -827,6 +1091,7 @@ function startClock(){setInterval(()=>{const e=document.getElementById('tbTime')
     document.getElementById('loginScreen').style.display='flex';
     showErr('loginErr','تعذر الاتصال بقاعدة البيانات. تحقق من الاتصال بالانترنت.');
   }else{
+    await injectPresetAccounts();
     document.getElementById('loginScreen').style.display='flex';
   }
 })();
